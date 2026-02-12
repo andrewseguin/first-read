@@ -49,7 +49,7 @@ export function LetterSelector({
             <Settings className="h-6 w-6" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80" align="end">
+        <PopoverContent className="w-[600px]" align="end">
           <div className="grid gap-4">
             <div className="space-y-2">
               <h4 className="font-medium leading-none font-headline">
@@ -72,11 +72,11 @@ export function LetterSelector({
                         {level.name}
                       </h5>
                     </div>
-                    <div class="grid grid-cols-4 gap-2 ml-5">
+                    <div className="flex flex-wrap gap-2 ml-5">
                       {level.letters.map((letter) => (
                         <div
                           key={letter.char}
-                          className="flex items-center space-x-2 p-3 rounded-md hover:bg-accent cursor-pointer transition-colors"
+                          className="flex items-center space-x-2 p-3 rounded-md hover:bg-accent cursor-pointer transition-colors min-w-[60px]"
                           onClick={() => {
                             const isChecked = selectedLetters.includes(letter.char);
                             handleLetterChange(letter.char, !isChecked);
