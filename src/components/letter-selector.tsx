@@ -52,12 +52,9 @@ export function LetterSelector({
         <PopoverContent className="w-[600px] max-h-[90vh] overflow-y-auto" align="end">
           <div className="grid gap-4">
             <div className="space-y-2">
-              <h4 className="font-medium leading-none font-headline">
-                Choose Letters
-              </h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-medium leading-none font-headline text-lg">
                 Select the letters you want to practice.
-              </p>
+              </h4>
             </div>
             <div className="space-y-4 pr-4">
                 {LETTER_LEVELS.map((level) => (
