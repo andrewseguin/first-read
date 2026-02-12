@@ -1,22 +1,3 @@
-
-"use client";
-
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-
-type DisplayContent = {
-  key: string;
-  type: "letter" | "message";
-  value: string;
-  color?: string;
-  textColor?: string;
-  verticalOffset?: number;
-};
-
-type LetterDisplayProps = {
-  content: DisplayContent;
-};
-
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -38,6 +19,7 @@ type LetterDisplayProps = {
 
 export function LetterDisplay({ content }: LetterDisplayProps) {
   // Generate random rotation for exit animation on render
+  // This is safe because exit animations only happen on client side updates
   const exitRotation = Math.random() * 60 - 30;
 
   return (
