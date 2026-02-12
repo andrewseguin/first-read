@@ -149,7 +149,7 @@ export default function Home() {
   return (
     <main
       className="flex h-svh w-screen cursor-pointer items-center justify-center bg-background overflow-hidden relative focus:outline-none"
-      onClick={showNextContent}
+      onPointerDown={showNextContent}
       tabIndex={-1}
     >
       <LetterDisplay content={displayContent} />
