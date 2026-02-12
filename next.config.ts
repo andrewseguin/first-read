@@ -1,6 +1,10 @@
 import type {NextConfig} from 'next';
 
+const isGithubActions = process.env.GITHUB_ACTIONS === 'true'
+
 const nextConfig: NextConfig = {
+  output: 'export',
+  basePath: isGithubActions ? '/Peek-a-Letter' : '',
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
@@ -9,6 +13,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
