@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import useLocalStorage from "@/hooks/use-local-storage";
-import { DEFAULT_LETTERS } from "@/lib/letters";
+import { DEFAULT_LETTERS, getLetterData, LETTER_LEVELS } from "@/lib/letters";
 import { LetterSelector } from "@/components/letter-selector";
 import { LetterDisplay } from "@/components/letter-display";
 import { getEncouragement } from "@/app/actions";
@@ -11,10 +11,25 @@ import { Loader } from "lucide-react";
 
 const ENCOURAGEMENT_INTERVAL = 5;
 
+const shuffle = (array: string[]) => {
+  let currentIndex = array.length,
+    randomIndex;
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+};
+
 type DisplayContent = {
   key: string;
   type: "letter" | "message";
   value: string;
+  color?: string;
 };
 
 export default function Home() {
@@ -23,18 +38,31 @@ export default function Home() {
     DEFAULT_LETTERS
   );
 
+  const [lettersInCycle, setLettersInCycle] = useState<string[]>([]);
+
   const availableLetters = useMemo(() => {
     return selectedLetters.length > 0 ? selectedLetters : [];
   }, [selectedLetters]);
+  
+  const getInitialLetter = () => {
+    const letter = availableLetters.length > 0 ? availableLetters[0] : 'a';
+    const data = getLetterData(letter);
+    return {
+      key: "initial",
+      type: "letter" as const,
+      value: letter,
+      color: data?.color,
+    }
+  }
 
-  const [displayContent, setDisplayContent] = useState<DisplayContent>({
-    key: "initial",
-    type: "letter",
-    value: "a",
-  });
+  const [displayContent, setDisplayContent] = useState<DisplayContent>(getInitialLetter());
   const [sessionCount, setSessionCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    setLettersInCycle([]);
+  }, [availableLetters]);
 
   useEffect(() => {
     if (availableLetters.length === 0) {
@@ -51,24 +79,25 @@ export default function Home() {
       displayContent.type === "letter" &&
       !availableLetters.includes(displayContent.value)
     ) {
+      const firstLetter = availableLetters[0];
+      const data = getLetterData(firstLetter);
       setDisplayContent({
         key: "update-from-selection",
         type: "letter",
-        value: availableLetters[0],
+        value: firstLetter,
+        color: data?.color,
       });
     }
   }, [availableLetters, displayContent]);
 
   const showNextContent = useCallback(async () => {
     if (isLoading) return;
-
     setIsLoading(true);
 
     const newCount = sessionCount + 1;
     setSessionCount(newCount);
 
     try {
-      // Show encouragement message
       if (
         newCount % ENCOURAGEMENT_INTERVAL === 0 &&
         availableLetters.length > 0
@@ -80,7 +109,6 @@ export default function Home() {
           value: message,
         });
       } else {
-        // Show letter
         if (availableLetters.length === 0) {
           setDisplayContent({
             key: "no-letters-msg",
@@ -91,22 +119,22 @@ export default function Home() {
           return;
         }
 
-        let newLetter =
-          availableLetters[Math.floor(Math.random() * availableLetters.length)];
-
-        if (availableLetters.length > 1) {
-          while (newLetter === displayContent.value) {
-            newLetter =
-              availableLetters[
-                Math.floor(Math.random() * availableLetters.length)
-              ];
-          }
+        let currentCycle = lettersInCycle;
+        if (currentCycle.length === 0) {
+          currentCycle = shuffle([...availableLetters]);
         }
+        
+        const newLetter = currentCycle[0];
+        const newCycle = currentCycle.slice(1);
+        setLettersInCycle(newCycle);
+
+        const letterData = getLetterData(newLetter);
 
         setDisplayContent({
           key: Date.now().toString(),
           type: "letter",
           value: newLetter,
+          color: letterData?.color,
         });
       }
     } catch (error) {
@@ -124,7 +152,7 @@ export default function Home() {
     sessionCount,
     availableLetters,
     toast,
-    displayContent.value,
+    lettersInCycle,
   ]);
 
   useEffect(() => {

@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ALL_LETTERS } from "@/lib/letters";
+import { LETTER_LEVELS } from "@/lib/letters";
 import type { Dispatch, SetStateAction } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -58,24 +58,33 @@ export function LetterSelector({
                 Select the letters you want to practice.
               </p>
             </div>
-            <ScrollArea className="h-48">
-              <div className="grid grid-cols-4 gap-4 pr-4">
-                {ALL_LETTERS.map((letter) => (
-                  <div key={letter} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`letter-${letter}`}
-                      checked={selectedLetters.includes(letter)}
-                      onCheckedChange={(checked) =>
-                        handleLetterChange(letter, !!checked)
-                      }
-                      aria-label={letter}
-                    />
-                    <Label
-                      htmlFor={`letter-${letter}`}
-                      className="text-lg font-medium font-headline cursor-pointer"
-                    >
-                      {letter}
-                    </Label>
+            <ScrollArea className="h-64">
+              <div className="space-y-4 pr-4">
+                {LETTER_LEVELS.map((level) => (
+                  <div key={level.level}>
+                    <h5 className="mb-2 text-sm font-semibold font-headline text-muted-foreground">
+                      {level.name}
+                    </h5>
+                    <div className="grid grid-cols-4 gap-4">
+                      {level.letters.map((letter) => (
+                        <div key={letter} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`letter-${letter}`}
+                            checked={selectedLetters.includes(letter)}
+                            onCheckedChange={(checked) =>
+                              handleLetterChange(letter, !!checked)
+                            }
+                            aria-label={letter}
+                          />
+                          <Label
+                            htmlFor={`letter-${letter}`}
+                            className="text-lg font-medium font-headline cursor-pointer"
+                          >
+                            {letter}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
