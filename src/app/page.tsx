@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { DEFAULT_LETTERS } from "@/lib/letters";
 import { LetterSelector } from "@/components/letter-selector";
 import { LetterDisplay } from "@/components/letter-display";
-import { getEncouragement, getPhonicsSound } from "@/app/actions";
+import { getEncouragement } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
 
@@ -22,10 +22,6 @@ export default function Home() {
     "peek-a-letter-selection",
     DEFAULT_LETTERS
   );
-  const [isPhonicsMode, setIsPhonicsMode] = useLocalStorage<boolean>(
-    "peek-a-letter-phonics-mode",
-    false
-  );
 
   const availableLetters = useMemo(() => {
     return selectedLetters.length > 0 ? selectedLetters : [];
@@ -39,8 +35,6 @@ export default function Home() {
   const [sessionCount, setSessionCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (availableLetters.length === 0) {
@@ -69,7 +63,6 @@ export default function Home() {
     if (isLoading) return;
 
     setIsLoading(true);
-    setAudioSrc(null);
 
     const newCount = sessionCount + 1;
     setSessionCount(newCount);
@@ -115,20 +108,6 @@ export default function Home() {
           type: "letter",
           value: newLetter,
         });
-
-        if (isPhonicsMode) {
-          const audioData = await getPhonicsSound(newLetter);
-          if (audioData) {
-            setAudioSrc(audioData);
-          } else if (isPhonicsMode) {
-            // Only toast if phonics mode is on and failed
-            toast({
-              title: "Audio Error",
-              description: "Could not play letter sound.",
-              variant: "destructive",
-            });
-          }
-        }
       }
     } catch (error) {
       console.error("Failed to fetch content:", error);
@@ -144,7 +123,6 @@ export default function Home() {
     isLoading,
     sessionCount,
     availableLetters,
-    isPhonicsMode,
     toast,
     displayContent.value,
   ]);
@@ -163,14 +141,6 @@ export default function Home() {
     };
   }, [showNextContent]);
 
-  useEffect(() => {
-    if (audioSrc && audioRef.current) {
-      audioRef.current
-        .play()
-        .catch((e) => console.error("Audio playback failed:", e));
-    }
-  }, [audioSrc]);
-
   return (
     <main
       className="flex h-svh w-screen cursor-pointer items-center justify-center bg-background overflow-hidden relative focus:outline-none"
@@ -181,10 +151,7 @@ export default function Home() {
       <LetterSelector
         selectedLetters={selectedLetters}
         setSelectedLetters={setSelectedLetters}
-        isPhonicsMode={isPhonicsMode}
-        setIsPhonicsMode={setIsPhonicsMode}
       />
-      {audioSrc && <audio ref={audioRef} src={audioSrc} />}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <Loader className="h-16 w-16 animate-spin text-primary" />

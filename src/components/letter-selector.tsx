@@ -12,21 +12,15 @@ import {
 import { ALL_LETTERS } from "@/lib/letters";
 import type { Dispatch, SetStateAction } from "react";
 import { ScrollArea } from "./ui/scroll-area";
-import { Separator } from "./ui/separator";
-import { Switch } from "./ui/switch";
 
 type LetterSelectorProps = {
   selectedLetters: string[];
   setSelectedLetters: Dispatch<SetStateAction<string[]>>;
-  isPhonicsMode: boolean;
-  setIsPhonicsMode: Dispatch<SetStateAction<boolean>>;
 };
 
 export function LetterSelector({
   selectedLetters,
   setSelectedLetters,
-  isPhonicsMode,
-  setIsPhonicsMode,
 }: LetterSelectorProps) {
   const handleParentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -86,23 +80,6 @@ export function LetterSelector({
                 ))}
               </div>
             </ScrollArea>
-            <Separator />
-            <div className="space-y-2">
-              <h4 className="font-medium leading-none font-headline">Settings</h4>
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                 <div className="space-y-0.5">
-                    <Label htmlFor="phonics-mode" className="cursor-pointer font-medium">Phonics Mode</Label>
-                     <p className="text-sm text-muted-foreground">
-                        Say the letter's sound when it appears.
-                    </p>
-                 </div>
-                <Switch
-                    id="phonics-mode"
-                    checked={isPhonicsMode}
-                    onCheckedChange={setIsPhonicsMode}
-                />
-              </div>
-            </div>
           </div>
         </PopoverContent>
       </Popover>
