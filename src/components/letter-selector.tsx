@@ -37,7 +37,7 @@ export function LetterSelector({
   };
 
   return (
-    <div onClick={handleParentClick}>
+    <div onClick={handleParentClick} onPointerDown={(e) => e.stopPropagation()}>
       <Popover>
         <PopoverTrigger asChild>
           <Button

@@ -39,6 +39,7 @@ export function FullscreenToggle() {
       size="icon"
       className="absolute top-4 right-16 text-foreground/50 hover:text-foreground active:scale-95 transition-transform"
       onClick={handleClick}
+      onPointerDown={(e) => e.stopPropagation()}
       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
     >
       {isFullscreen ? (
