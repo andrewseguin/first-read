@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 type DisplayContent = {
   key: string;
-  type: "letter" | "message";
+  type: "letter" | "message" | "word";
   value: string;
   color?: string;
   textColor?: string;
@@ -29,6 +29,8 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     );
   }
 
+  const isWord = content.type === "word";
+
   return (
     <Card
       key={content.key}
@@ -43,8 +45,9 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
       <CardContent className="p-0 h-full flex items-center justify-center">
         <span
           className={cn(
-            "font-headline font-normal text-[17.5rem] leading-none",
-            "select-none [text-shadow:3px_3px_6px_rgba(0,0,0,0.2)]"
+            "font-headline font-normal leading-none",
+            "select-none [text-shadow:3px_3px_6px_rgba(0,0,0,0.2)]",
+            isWord ? "text-[10rem]" : "text-[17.5rem]"
           )}
           style={{
             color: content.textColor || 'white',
