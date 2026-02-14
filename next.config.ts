@@ -2,6 +2,7 @@ import type {NextConfig} from 'next';
 import withPWA from 'next-pwa';
 
 const isProd = process.env.NODE_ENV === 'production';
+console.log("NODE_ENV in next.config.ts:", process.env.NODE_ENV);
 
 const nextConfig: NextConfig = {
   output: 'standalone',
