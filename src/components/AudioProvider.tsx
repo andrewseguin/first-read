@@ -13,11 +13,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [audioCache, setAudioCache] = useState<Record<string, HTMLAudioElement>>({});
 
   useEffect(() => {
-    console.log("NEXT_PUBLIC_BASE_PATH:", process.env.NEXT_PUBLIC_BASE_PATH);
     const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
     const newAudioCache: Record<string, HTMLAudioElement> = {};
     alphabet.forEach(letter => {
-      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const basePath = process.env.NODE_ENV === 'production' ? '/first-read' : '';
       const audio = new Audio(`${basePath}/sounds/optimized/alphasounds-${letter}.mp3`);
       audio.preload = 'auto';
       newAudioCache[letter] = audio;

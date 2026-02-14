@@ -1,9 +1,11 @@
 import type {NextConfig} from 'next';
 import withPWA from 'next-pwa';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig: NextConfig = {
   output: 'standalone',
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  basePath: isProd ? '/first-read' : '',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -37,5 +39,5 @@ const nextConfig: NextConfig = {
 
 export default withPWA({
   dest: 'public',
-  scope: process.env.NEXT_PUBLIC_BASE_PATH || '/',
+  scope: isProd ? '/first-read/' : '/',
 })(nextConfig as any);
