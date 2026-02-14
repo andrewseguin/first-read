@@ -1,7 +1,9 @@
 
 "use client";
 
-import { Star } from "lucide-react"; // Import the Star icon
+import { useState } from "react";
+import { Star, Speaker, Volume2 } from "lucide-react"; // Import the Star and new Speaker icons
+import { Button } from "@/components/ui/button"; // Import Button component
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -26,6 +28,27 @@ type LetterDisplayProps = {
 };
 
 export function LetterDisplay({ content }: LetterDisplayProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  function speakLetter(event: React.MouseEvent) {
+    event.stopPropagation();
+    if (typeof window !== "undefined" && !isPlaying) {
+      const audio = new Audio(`/sounds/alphasounds-${content.value.toLowerCase()}.mp3`);
+      setIsPlaying(true);
+      audio.onended = () => {
+        setIsPlaying(false);
+      };
+      audio.play().catch(e => {
+        console.error("Error playing audio:", e)
+        setIsPlaying(false);
+      });
+    } else if (isPlaying) {
+        // Optional: logic to stop the sound if it's already playing
+    } else {
+      console.warn("Audio playback not supported in this environment.");
+    }
+  }
+
   if (content.type === "message") {
     return (
       <div
@@ -78,6 +101,19 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           >
             {content.value}
           </span>
+          {content.type === "letter" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute bottom-4 right-4 text-foreground/70 hover:text-foreground"
+              onClick={(e) => speakLetter(e)}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {isPlaying ? <Volume2 className="h-8 w-8" /> : <Speaker className="h-8 w-8" />}
+            </Button>
+          )}
         </CardContent>
       </Card>
-    );}
+    );
+  }
+
