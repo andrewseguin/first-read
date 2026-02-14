@@ -14,12 +14,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const basePath = process.env.NODE_ENV === 'production' ? '/first-read' : '';
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href={`${basePath}/manifest.json`} />
-        <link rel="icon" href={`${basePath}/logo.png`} />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/logo.png" />
         <meta name="theme-color" content="#09090b" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
