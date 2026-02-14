@@ -33,7 +33,8 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   function speakLetter(event: React.MouseEvent) {
     event.stopPropagation();
     if (typeof window !== "undefined" && !isPlaying) {
-      const audio = new Audio(`/sounds/alphasounds-${content.value.toLowerCase()}.mp3`);
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const audio = new Audio(`${basePath}/sounds/alphasounds-${content.value.toLowerCase()}.mp3`);
       setIsPlaying(true);
       audio.onended = () => {
         setIsPlaying(false);
