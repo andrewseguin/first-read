@@ -13,6 +13,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [audioCache, setAudioCache] = useState<Record<string, HTMLAudioElement>>({});
 
   useEffect(() => {
+    console.log("NEXT_PUBLIC_BASE_PATH:", process.env.NEXT_PUBLIC_BASE_PATH);
     const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
     const newAudioCache: Record<string, HTMLAudioElement> = {};
     alphabet.forEach(letter => {
