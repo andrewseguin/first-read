@@ -37,4 +37,4 @@ const nextConfig: NextConfig = {
 
 export default withPWA({
   dest: 'public',
-})(nextConfig);
+})(nextConfig as any);
