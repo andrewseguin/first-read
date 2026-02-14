@@ -27,26 +27,28 @@ type LetterDisplayProps = {
   content: DisplayContent;
 };
 
+import { useAudio } from "@/components/AudioProvider";
+
 export function LetterDisplay({ content }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioCache = useAudio();
 
   function speakLetter(event: React.MouseEvent) {
     event.stopPropagation();
-    if (typeof window !== "undefined" && !isPlaying) {
-      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-      const audio = new Audio(`${basePath}/sounds/alphasounds-${content.value.toLowerCase()}.mp3`);
-      setIsPlaying(true);
-      audio.onended = () => {
-        setIsPlaying(false);
-      };
-      audio.play().catch(e => {
-        console.error("Error playing audio:", e)
-        setIsPlaying(false);
-      });
+    if (audioCache && !isPlaying) {
+      const audio = audioCache[content.value.toLowerCase()];
+      if (audio) {
+        setIsPlaying(true);
+        audio.onended = () => {
+          setIsPlaying(false);
+        };
+        audio.play().catch(e => {
+          console.error("Error playing audio:", e)
+          setIsPlaying(false);
+        });
+      }
     } else if (isPlaying) {
         // Optional: logic to stop the sound if it's already playing
-    } else {
-      console.warn("Audio playback not supported in this environment.");
     }
   }
 

@@ -1,0 +1,36 @@
+
+"use client";
+
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+
+const AudioContext = createContext<Record<string, HTMLAudioElement> | null>(null);
+
+export function useAudio() {
+  return useContext(AudioContext);
+}
+
+export function AudioProvider({ children }: { children: React.ReactNode }) {
+  const [audioCache, setAudioCache] = useState<Record<string, HTMLAudioElement>>({});
+
+  useEffect(() => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    const newAudioCache: Record<string, HTMLAudioElement> = {};
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+    alphabet.forEach(letter => {
+      const audio = new Audio(`${basePath}/sounds/alphasounds-${letter}.mp3`);
+      audio.preload = 'auto';
+      newAudioCache[letter] = audio;
+    });
+
+    setAudioCache(newAudioCache);
+  }, []);
+
+  const value = useMemo(() => audioCache, [audioCache]);
+
+  return (
+    <AudioContext.Provider value={value}>
+      {children}
+    </AudioContext.Provider>
+  );
+}

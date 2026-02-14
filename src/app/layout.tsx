@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster";
+import { AudioProvider } from "@/components/AudioProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import './globals.css';
 
@@ -23,15 +24,17 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <AudioProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </AudioProvider>
       </body>
     </html>
   );
