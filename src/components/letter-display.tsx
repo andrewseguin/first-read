@@ -152,7 +152,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             "text-6xl sm:text-8xl md:text-[10rem]"
           )} style={{
             color: content.textColor || 'white',
-            transform: `translateY(${content.verticalOffset || 0}rem)`,
+            transform: `translateY(${content.verticalOffset || 0}em)`,
             transition: 'transform 0.2s ease-out'
           }}>
             {content.value.split('').map((letter, index) => (
@@ -173,7 +173,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             )}
             style={{
               color: content.textColor || 'white',
-              transform: `translateY(${content.verticalOffset || 0}rem)`,
+              transform: `translateY(${content.verticalOffset || 0}em)`,
               transition: 'transform 0.2s ease-out'
             }}
           >
