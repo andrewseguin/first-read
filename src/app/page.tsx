@@ -103,6 +103,31 @@ export default function Home() {
 
   useEffect(() => {
     setHydrated(true);
+
+    // Randomize initial content
+    if (gameMode === 'letters') {
+      const available = selectedLetters.length > 0 ? selectedLetters : DEFAULT_LETTERS;
+      const randomChar = available[Math.floor(Math.random() * available.length)];
+      const data = getLetterInfo(randomChar);
+      const newContent: DisplayContent = {
+        key: Date.now().toString(), // Ensure unique key
+        type: "letter",
+        value: randomChar,
+        color: data?.color,
+        textColor: data?.textColor,
+        verticalOffset: data?.verticalOffset,
+      };
+      setHistory([newContent]);
+      setHistoryIndex(0);
+      displayContentRef.current = newContent;
+    } else if (gameMode === 'words') {
+      // Logic for words randomization if needed, though words mode usually starts blank or valid
+      // For now, let's keep it simple and just do letters as that's the main mode
+      // But actually, let's trigger a next word if we are in words mode
+      // To keep it simple and safe, we'll just stick to the letter randomization for now as that's the default
+      // and what the user is seeing.
+    }
+
   }, []);
 
   useEffect(() => {
