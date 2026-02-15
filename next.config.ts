@@ -1,11 +1,11 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
 
 const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  basePath: isProd ? '/first-read' : '',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   typescript: {
     ignoreBuildErrors: true,
   },
