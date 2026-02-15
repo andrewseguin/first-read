@@ -85,6 +85,8 @@ export default function Home() {
   );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const lastMenuCloseTimeRef = useRef(0);
   const [lettersInCycle, setLettersInCycle] = useLocalStorage<string[]>(
     "first-read-cycle",
     []
@@ -112,8 +114,8 @@ export default function Home() {
 
   // Update ref when state changes
   useEffect(() => {
-    isMenuOpenRef.current = isMenuOpen;
-  }, [isMenuOpen]);
+    isMenuOpenRef.current = isMenuOpen || isSettingsOpen;
+  }, [isMenuOpen, isSettingsOpen]);
 
   const availableLetters = useMemo(() => {
     return selectedLetters.length > 0 ? selectedLetters : [];
@@ -396,11 +398,25 @@ export default function Home() {
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    // If a menu was just closed, ignore this interaction
+    if (Date.now() - lastMenuCloseTimeRef.current < 300) return;
     touchStartRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!touchStartRef.current) return;
+
+    // If a menu was just closed, ignore this interaction
+    if (Date.now() - lastMenuCloseTimeRef.current < 300) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    // If a menu was just closed, ignore this interaction
+    if (Date.now() - lastMenuCloseTimeRef.current < 300) {
+      touchStartRef.current = null;
+      return;
+    }
 
     const deltaX = e.clientX - touchStartRef.current.x;
     const deltaY = e.clientY - touchStartRef.current.y;
@@ -411,6 +427,7 @@ export default function Home() {
 
     // Check if it's a tap (minimal movement)
     if (absDeltaX < 10 && absDeltaY < 10) {
+      if (Date.now() - lastMenuCloseTimeRef.current < 300) return;
       showNextContent(false, true);
       return;
     }
@@ -468,6 +485,20 @@ export default function Home() {
     return null;
   }
 
+  const handleMenuOpenChange = (open: boolean) => {
+    if (!open) {
+      lastMenuCloseTimeRef.current = Date.now();
+    }
+    setIsMenuOpen(open);
+  }
+
+  const handleSettingsOpenChange = (open: boolean) => {
+    if (!open) {
+      lastMenuCloseTimeRef.current = Date.now();
+    }
+    setIsSettingsOpen(open);
+  }
+
   return (
     <main
       className="flex h-svh w-screen cursor-pointer items-center justify-center bg-background overflow-hidden relative focus:outline-none touch-none"
@@ -481,7 +512,7 @@ export default function Home() {
           open={isMenuOpen}
           selectedLetters={selectedLetters}
           setSelectedLetters={setSelectedLetters}
-          onOpenChange={setIsMenuOpen}
+          onOpenChange={handleMenuOpenChange}
           gameMode={gameMode}
           onGameModeChange={setGameMode}
           wordDifficulty={wordDifficulty}
@@ -494,6 +525,8 @@ export default function Home() {
           onShowCardCountChange={setShowCardCount}
           showTimer={showTimer}
           onShowTimerChange={setShowTimer}
+          open={isSettingsOpen}
+          onOpenChange={handleSettingsOpenChange}
         />
         <FullscreenToggle />
       </div>

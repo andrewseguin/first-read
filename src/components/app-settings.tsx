@@ -16,6 +16,8 @@ type AppSettingsProps = {
   onShowCardCountChange: (show: boolean) => void;
   showTimer: boolean;
   onShowTimerChange: (show: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
 export function AppSettings({
@@ -23,9 +25,11 @@ export function AppSettings({
   onShowCardCountChange,
   showTimer,
   onShowTimerChange,
+  open,
+  onOpenChange,
 }: AppSettingsProps) {
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
