@@ -287,6 +287,16 @@ export default function Home() {
     if (gameMode === 'letters') {
       // If selectedLetters is empty, always show the message.
       if (selectedLetters.length === 0) {
+        // Check if we already have the message displayed to avoid infinite loop
+        if (
+          history.length === 1 &&
+          history[0].type === "message" &&
+          history[0].key === "no-letters"
+        ) {
+          prevSelectedLettersRef.current = selectedLetters;
+          return;
+        }
+
         const newContent: DisplayContent = {
           key: "no-letters",
           type: "message",
@@ -468,6 +478,7 @@ export default function Home() {
       <LetterDisplay content={displayContent} />
       <div className="absolute top-4 right-4 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
         <LetterSelector
+          open={isMenuOpen}
           selectedLetters={selectedLetters}
           setSelectedLetters={setSelectedLetters}
           onOpenChange={setIsMenuOpen}

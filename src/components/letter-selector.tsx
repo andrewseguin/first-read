@@ -1,8 +1,7 @@
 
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
@@ -13,6 +12,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { GameModeToggle } from "./game-mode-toggle";
 
 type LetterSelectorProps = {
+  open: boolean;
   selectedLetters: string[];
   setSelectedLetters: Dispatch<SetStateAction<string[]>>;
   onOpenChange?: (open: boolean) => void;
@@ -28,6 +28,7 @@ import { WordDifficultyToggle } from "./word-difficulty-toggle";
 import { WordLengthSelector } from "./word-length-selector";
 
 export function LetterSelector({
+  open,
   selectedLetters,
   setSelectedLetters,
   onOpenChange,
@@ -68,7 +69,7 @@ export function LetterSelector({
   };
 
   return (
-    <Popover onOpenChange={onOpenChange}>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="default"
@@ -79,48 +80,71 @@ export function LetterSelector({
           <GraduationCap className="h-6 w-6" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[90vw] sm:w-[500px] max-h-[90vh] overflow-y-auto" align="end" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="grid gap-4">
-          <div>
-            <h4 className="font-medium leading-none font-headline text-lg mb-4">
-              Game Mode
-            </h4>
-            <GameModeToggle
-              value={gameMode}
-              onValueChange={onGameModeChange}
-              className="w-full mb-8"
-            />
-            {gameMode === 'words' && (
-              <>
-                <div className="mb-8">
-                  <h4 className="font-medium leading-none font-headline text-lg mb-4">
-                    Word Difficulty
-                  </h4>
-                  <WordDifficultyToggle
-                    value={wordDifficulty}
-                    onValueChange={onWordDifficultyChange}
-                    className="w-full"
-                  />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Hard mode: includes words where vowels sound long or irregular. Cards will display a star.
-                  </p>
-                </div>
-                <div className="mb-8">
-                  <h4 className="font-medium leading-none font-headline text-lg mb-4">
-                    Word Length
-                  </h4>
-                  <WordLengthSelector
-                    selectedLengths={selectedWordLengths}
-                    onSelectedLengthsChange={onSelectedWordLengthsChange}
-                  />
-                </div>
-              </>
-            )}
-            <h4 className="font-medium leading-none font-headline text-lg">
-              Letters
-            </h4>
-          </div>
-          <div className="space-y-4 pr-4">
+      <PopoverContent
+        className="mobile-fullscreen [@media(max-width:640px)]:!z-50 [@media(max-width:640px)]:!w-screen [@media(max-width:640px)]:!h-screen [@media(max-width:640px)]:!max-w-none [@media(max-width:640px)]:!m-0 [@media(max-width:640px)]:!rounded-none [@media(max-width:640px)]:!border-none sm:w-[400px] sm:h-auto sm:max-h-[90vh] sm:rounded-md sm:border bg-background p-0 flex flex-col"
+        align="end"
+        sideOffset={0}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-end p-4 border-b sm:hidden sticky top-0 bg-background z-10">
+          <h4 className="font-medium font-headline text-lg mr-auto">
+            Settings
+          </h4>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange?.(false)}
+            aria-label="Close menu"
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid gap-4 sm:mt-0">
+            <div>
+              <h4 className="font-medium leading-none font-headline text-lg mb-4 hidden sm:block">
+                Game Mode
+              </h4>
+              <h4 className="font-medium leading-none font-headline text-lg mb-4 sm:hidden">
+                Game Mode
+              </h4>
+              <GameModeToggle
+                value={gameMode}
+                onValueChange={onGameModeChange}
+                className="w-full mb-8"
+              />
+              {gameMode === 'words' && (
+                <>
+                  <div className="mb-8">
+                    <h4 className="font-medium leading-none font-headline text-lg mb-4">
+                      Word Difficulty
+                    </h4>
+                    <WordDifficultyToggle
+                      value={wordDifficulty}
+                      onValueChange={onWordDifficultyChange}
+                      className="w-full"
+                    />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Hard mode: includes words where vowels sound long or irregular. Cards will display a star.
+                    </p>
+                  </div>
+                  <div className="mb-8">
+                    <h4 className="font-medium leading-none font-headline text-lg mb-4">
+                      Word Length
+                    </h4>
+                    <WordLengthSelector
+                      selectedLengths={selectedWordLengths}
+                      onSelectedLengthsChange={onSelectedWordLengthsChange}
+                    />
+                  </div>
+                </>
+              )}
+              <h4 className="font-medium leading-none font-headline text-lg">
+                Letters
+              </h4>
+            </div>
+            <div className="space-y-4 pr-4">
               {LETTER_LEVELS.map((level) => (
                 <div key={level.level}>
                   <div className="flex items-center gap-2 mb-2">
@@ -147,36 +171,33 @@ export function LetterSelector({
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 ml-5">
-                    {level.letters.map((letter) => (
-                      <div
-                        key={letter.char}
-                        className="flex items-center space-x-2 p-3 rounded-md hover:bg-accent cursor-pointer transition-colors min-w-[60px]"
-                        onClick={() => {
-                          const isChecked = selectedLetters.includes(letter.char);
-                          handleLetterChange(letter.char, !isChecked);
-                        }}
-                      >
-                        <Checkbox
-                          id={`letter-${letter.char}`}
-                          checked={selectedLetters.includes(letter.char)}
-                          onCheckedChange={(checked) =>
-                            handleLetterChange(letter.char, !!checked)
-                          }
-                          aria-label={letter.char}
-                          className="h-5 w-5"
-                        />
-                        <Label
-                          htmlFor={`letter-${letter.char}`}
-                          className="text-xl font-medium font-headline cursor-pointer pointer-events-none"
+                    {level.letters.map((letter) => {
+                      const isSelected = selectedLetters.includes(letter.char);
+                      return (
+                        <div
+                          key={letter.char}
+                          className={cn(
+                            "flex items-center justify-center w-12 h-12 rounded-xl cursor-pointer transition-all duration-200 shadow-sm",
+                            isSelected
+                              ? "scale-110 font-bold shadow-md bg-primary text-primary-foreground hover:bg-primary/90"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          )}
+                          onClick={() => handleLetterChange(letter.char, !isSelected)}
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          aria-label={`Select letter ${letter.char}`}
                         >
-                          {letter.char}
-                        </Label>
-                      </div>
-                    ))}
+                          <span className="text-2xl font-headline pb-1">
+                            {letter.char}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
+          </div>
         </div>
       </PopoverContent>
     </Popover>
