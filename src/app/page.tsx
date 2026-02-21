@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { DEFAULT_LETTERS, getLetterInfo, LETTER_LEVELS } from "@/lib/letters";
-import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from "@/lib/words";
+import { EASY_WORDS, HARD_WORDS } from "@/lib/words";
 import { LetterSelector } from "@/components/letter-selector";
 import { LetterDisplay } from "@/components/letter-display";
 import { FullscreenToggle } from "@/components/fullscreen-toggle";
@@ -52,7 +52,6 @@ type DisplayContent = {
   textColor?: string;
   verticalOffset?: number;
   isHardWord?: boolean; // New property to indicate if the word is hard
-  isMediumWord?: boolean; // New property for words with special sounds
 };
 
 export default function Home() {
@@ -221,8 +220,8 @@ export default function Home() {
     if (gameMode === "words") {
       const wordPool =
         wordDifficulty === "easy"
-          ? [...EASY_WORDS, ...MEDIUM_WORDS]
-          : [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
+          ? EASY_WORDS
+          : [...EASY_WORDS, ...HARD_WORDS];
       const possibleWords = wordPool.filter((word) => {
         const wordLetters = word.split("");
         if (!selectedWordLengths.includes(word.length)) {
@@ -273,7 +272,6 @@ export default function Home() {
 
       const { color, textColor } = getHighestLevelInfoForWord(newWord);
       const isHard = HARD_WORDS.includes(newWord);
-      const isMedium = MEDIUM_WORDS.includes(newWord);
 
       const newContent = {
         key: Date.now().toString(),
@@ -282,7 +280,6 @@ export default function Home() {
         color: color,
         textColor: textColor,
         isHardWord: isHard,
-        isMediumWord: isMedium,
       };
       const newHistory = history.slice(0, historyIndex + 1);
       setHistory([...newHistory, newContent]);

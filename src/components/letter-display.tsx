@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
-import { Star, Speaker, Volume2 } from "lucide-react"; // Import the Star and new Speaker icons
+import { useState, useRef, useEffect } from "react";
+import { Star, Volume2 } from "lucide-react"; // Import the Star and Volume2 icons
 import { Button } from "@/components/ui/button"; // Import Button component
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +22,6 @@ type DisplayContent = {
   textColor?: string;
   verticalOffset?: number;
   isHardWord?: boolean; // New property to indicate if the word is hard
-  isMediumWord?: boolean; // New property for words with special sounds
 };
 
 type LetterDisplayProps = {
@@ -36,6 +35,31 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   const audioCache = useAudio();
 
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const stopPlayback = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    setHighlightedIndex(null);
+  };
+
+  useEffect(() => {
+    // Abort playback when content changes or component unmounts
+    stopPlayback();
+    return () => stopPlayback();
+  }, [content.key]);
 
   function speakLetter(event: React.MouseEvent) {
     event.stopPropagation();
@@ -43,22 +67,32 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
       const audio = audioCache[content.value.toLowerCase()];
       if (audio) {
         setIsPlaying(true);
+        currentAudioRef.current = audio;
         audio.onended = () => {
           setIsPlaying(false);
+          currentAudioRef.current = null;
         };
         audio.play().catch(e => {
           console.error("Error playing audio:", e)
           setIsPlaying(false);
+          currentAudioRef.current = null;
         });
       }
     } else if (isPlaying) {
-      // Optional: logic to stop the sound if it's already playing
+      stopPlayback();
     }
   }
 
   function speakWord(event: React.MouseEvent) {
     event.stopPropagation();
-    if (isPlaying) return;
+    if (isPlaying) {
+      stopPlayback();
+      return;
+    }
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    const signal = abortController.signal;
 
     if (content.isHardWord) {
       // For hard words, just say the word
@@ -66,8 +100,16 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         const utterance = new SpeechSynthesisUtterance(content.value);
         utterance.rate = 0.8;
         utterance.pitch = 1.2;
-        utterance.onstart = () => setIsPlaying(true);
-        utterance.onend = () => setIsPlaying(false);
+        utterance.onstart = () => {
+          if (signal.aborted) return;
+          setIsPlaying(true);
+        };
+        utterance.onend = () => {
+          setIsPlaying(false);
+          if (abortControllerRef.current === abortController) {
+            abortControllerRef.current = null;
+          }
+        };
         window.speechSynthesis.speak(utterance);
       }
     } else {
@@ -79,6 +121,8 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
       setIsPlaying(true);
 
       const playNextSegment = () => {
+        if (signal.aborted) return;
+
         if (currentIndex < segments.length) {
           setHighlightedIndex(currentIndex);
           const segment = segments[currentIndex];
@@ -86,14 +130,18 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           const audio = audioCache[soundKey];
 
           if (audio) {
+            currentAudioRef.current = audio;
             audio.onended = () => {
+              if (signal.aborted) return;
               currentIndex++;
               playNextSegment();
             };
             audio.currentTime = 0;
             audio.play().catch(e => {
               console.error("Error playing audio, falling back to speech synthesis:", e);
+              if (signal.aborted) return;
               speakSegmentWithFallback(segment, () => {
+                if (signal.aborted) return;
                 currentIndex++;
                 playNextSegment();
               });
@@ -101,6 +149,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           } else {
             // No audio file found, fallback to speech synthesis
             speakSegmentWithFallback(segment, () => {
+              if (signal.aborted) return;
               currentIndex++;
               playNextSegment();
             });
@@ -108,6 +157,9 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         } else {
           setHighlightedIndex(null);
           setIsPlaying(false);
+          if (abortControllerRef.current === abortController) {
+            abortControllerRef.current = null;
+          }
         }
       };
 
@@ -155,19 +207,16 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         borderLeft: "1px solid rgba(255,255,255,0.1)",
       }}
     >
-      {content.type === "word" && (content.isHardWord || content.isMediumWord) && (
+      {content.type === "word" && content.isHardWord && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className={cn(
-                "absolute top-4 right-4",
-                content.isHardWord ? "text-foreground/50" : "text-yellow-500/50"
-              )}>
+              <div className="absolute top-4 right-4 text-foreground/50">
                 <Star className="h-6 w-6" />
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{content.isHardWord ? "Hard Word" : "Medium Word"}</p>
+              <p>Hard Word</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -214,22 +263,40 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           <Button
             variant="ghost"
             size="icon-lg"
-            className="absolute bottom-4 right-4 text-foreground/70 hover:text-foreground"
+            className={cn(
+              "absolute bottom-4 right-4 transition-all duration-300 hover:bg-white/10",
+              isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
+            )}
             onClick={(e) => speakLetter(e)}
             onPointerDown={(e) => e.stopPropagation()}
+            style={{ color: 'white' }}
           >
-            {isPlaying ? <Volume2 className="h-12 w-12" /> : <Speaker className="h-12 w-12" />}
+            <Volume2
+              className="h-12 w-12"
+              style={{
+                filter: isPlaying ? 'drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 12px rgba(255,255,255,0.4))' : 'none'
+              }}
+            />
           </Button>
         )}
         {content.type === "word" && (
           <Button
             variant="ghost"
             size="icon-lg"
-            className="absolute bottom-4 right-4 text-foreground/70 hover:text-foreground"
+            className={cn(
+              "absolute bottom-4 right-4 transition-all duration-300 hover:bg-white/10",
+              isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
+            )}
             onClick={(e) => speakWord(e)}
             onPointerDown={(e) => e.stopPropagation()}
+            style={{ color: 'white' }}
           >
-            {isPlaying ? <Volume2 className="h-12 w-12" /> : <Speaker className="h-12 w-12" />}
+            <Volume2
+              className="h-12 w-12"
+              style={{
+                filter: isPlaying ? 'drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 12px rgba(255,255,255,0.4))' : 'none'
+              }}
+            />
           </Button>
         )}
       </CardContent>

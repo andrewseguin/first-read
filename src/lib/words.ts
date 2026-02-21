@@ -415,7 +415,8 @@ export const EASY_WORDS = [
   "zinc",
 ];
 
-export const MEDIUM_WORDS = [
+
+export const HARD_WORDS = [
   "her",
   "bird",
   "girl",
@@ -458,9 +459,6 @@ export const MEDIUM_WORDS = [
   "play",
   "stay",
   "say",
-];
-
-export const HARD_WORDS = [
   "air",
   "be",
   "box",
@@ -1155,4 +1153,4 @@ export const HARD_WORDS = [
   "yummy",
 ];
 
-export const WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
+export const WORDS = [...EASY_WORDS, ...HARD_WORDS];
