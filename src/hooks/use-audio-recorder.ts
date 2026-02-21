@@ -1,5 +1,6 @@
 
 import { useState, useRef, useCallback } from "react";
+import { trimSilence } from "@/lib/audio-utils";
 
 
 export function useAudioRecorder() {
@@ -37,8 +38,12 @@ export function useAudioRecorder() {
                 return;
             }
 
-            mediaRecorderRef.current.onstop = () => {
-                const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+            mediaRecorderRef.current.onstop = async () => {
+                const rawBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+
+                // Trim silence and convert to WAV
+                const audioBlob = await trimSilence(rawBlob);
+
                 setIsRecording(false);
                 setStream(null);
                 // Stop all tracks to release the microphone
