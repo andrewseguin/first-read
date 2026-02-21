@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { Settings, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,6 +18,7 @@ type AppSettingsProps = {
   onShowTimerChange: (show: boolean) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenRecordings: () => void;
 };
 
 export function AppSettings({
@@ -27,6 +28,7 @@ export function AppSettings({
   onShowTimerChange,
   open,
   onOpenChange,
+  onOpenRecordings,
 }: AppSettingsProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -71,6 +73,21 @@ export function AppSettings({
                 checked={showTimer}
                 onCheckedChange={onShowTimerChange}
               />
+            </div>
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 h-12 rounded-xl border-white/10 hover:bg-white/5"
+                onClick={() => {
+                  onOpenChange(false);
+                  onOpenRecordings();
+                }}
+              >
+                <div className="p-1.5 rounded-md bg-white/5">
+                  <Mic className="h-4 w-4" />
+                </div>
+                Manage Recordings
+              </Button>
             </div>
           </div>
         </div>

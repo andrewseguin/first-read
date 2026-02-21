@@ -10,6 +10,7 @@ import { LetterDisplay } from "@/components/letter-display";
 import { FullscreenToggle } from "@/components/fullscreen-toggle";
 import { AppSettings } from "@/components/app-settings";
 import { SessionStats } from "@/components/session-stats";
+import { RecordingsModal } from "@/components/recordings-modal";
 
 const shuffle = (array: string[]) => {
   let currentIndex = array.length,
@@ -86,6 +87,7 @@ export default function Home() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isRecordingsModalOpen, setIsRecordingsModalOpen] = useState(false);
   const lastMenuCloseTimeRef = useRef(0);
   const [lettersInCycle, setLettersInCycle] = useLocalStorage<string[]>(
     "first-read-cycle",
@@ -576,6 +578,7 @@ export default function Home() {
             onShowTimerChange={setShowTimer}
             open={isSettingsOpen}
             onOpenChange={handleSettingsOpenChange}
+            onOpenRecordings={() => setIsRecordingsModalOpen(true)}
           />
           <FullscreenToggle isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
         </div>
@@ -588,6 +591,10 @@ export default function Home() {
           showTimer={showTimer}
         />
       )}
+      <RecordingsModal
+        open={isRecordingsModalOpen}
+        onOpenChange={setIsRecordingsModalOpen}
+      />
     </main>
   );
 }

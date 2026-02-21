@@ -54,6 +54,17 @@ export class AudioStorage {
             request.onerror = () => reject(request.error);
         });
     }
+
+    async getAllRecordings(): Promise<string[]> {
+        await this.init();
+        return new Promise((resolve, reject) => {
+            const transaction = this.db!.transaction(this.storeName, "readonly");
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAllKeys();
+            request.onsuccess = () => resolve(request.result as string[]);
+            request.onerror = () => reject(request.error);
+        });
+    }
 }
 
 export const audioStorage = new AudioStorage();

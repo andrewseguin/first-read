@@ -58,21 +58,38 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   };
 
   useEffect(() => {
-    // Abort playback and stop recording when content changes or component unmounts
-    const stopEverything = async () => {
+    let isMounted = true;
+
+    const update = async () => {
+      // 1. Clear current state and stop playback
+      setLocalAudioUrl(null);
       stopPlayback();
-      if (isRecording) {
-        // Save using the value that was active when recording started
+
+      // 2. If we were recording, stop and save it to the PREVIOUS card
+      if (isRecording && recordingValueRef.current) {
         const targetValue = recordingValueRef.current;
-        const blob = await stopRecording();
-        if (blob && blob.size > 0 && targetValue) {
-          await audioStorage.saveRecording(targetValue, blob);
+        recordingValueRef.current = null; // Clear it so we don't save twice
+
+        try {
+          const blob = await stopRecording();
+          if (blob && blob.size > 0) {
+            await audioStorage.saveRecording(targetValue, blob);
+          }
+        } catch (e) {
+          console.error("Error stopping recording on navigation:", e);
         }
       }
+
+      // 3. Load the recording for the NEW card
+      if (isMounted) {
+        await loadLocalRecording();
+      }
     };
-    stopEverything();
-    loadLocalRecording();
+
+    update();
+
     return () => {
+      isMounted = false;
       stopPlayback();
       if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
     };
