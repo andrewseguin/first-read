@@ -40,6 +40,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const recordingValueRef = useRef<string | null>(null);
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
 
   const stopPlayback = () => {
@@ -61,7 +62,12 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     const stopEverything = async () => {
       stopPlayback();
       if (isRecording) {
-        await handleToggleRecording();
+        // Save using the value that was active when recording started
+        const targetValue = recordingValueRef.current;
+        const blob = await stopRecording();
+        if (blob && blob.size > 0 && targetValue) {
+          await audioStorage.saveRecording(targetValue, blob);
+        }
       }
     };
     stopEverything();
@@ -84,15 +90,22 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
 
   const handleToggleRecording = async () => {
     if (isRecording) {
+      const targetValue = recordingValueRef.current;
       const blob = await stopRecording();
-      if (blob && blob.size > 0) {
-        await audioStorage.saveRecording(content.value, blob);
-        const url = URL.createObjectURL(blob);
-        if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
-        setLocalAudioUrl(url);
+      recordingValueRef.current = null;
+
+      if (blob && blob.size > 0 && targetValue) {
+        await audioStorage.saveRecording(targetValue, blob);
+        // Only update local URL if we're still on the same card
+        if (targetValue === content.value) {
+          const url = URL.createObjectURL(blob);
+          if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+          setLocalAudioUrl(url);
+        }
       }
     } else {
       stopPlayback();
+      recordingValueRef.current = content.value;
       await startRecording();
     }
   };
