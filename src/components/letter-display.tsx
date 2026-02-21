@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"; // Import tooltip components
+import { splitIntoPhonicsSegments, getSoundKeyForSegment } from "@/lib/phonics";
 
 type DisplayContent = {
   key: string;
@@ -72,19 +73,20 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
       // For easy words, sound it out
       if (!audioCache) return;
 
-      const letters = content.value.split('');
+      const segments = splitIntoPhonicsSegments(content.value);
       let currentIndex = 0;
       setIsPlaying(true);
 
-      const playNextLetter = () => {
-        if (currentIndex < letters.length) {
+      const playNextSegment = () => {
+        if (currentIndex < segments.length) {
           setHighlightedIndex(currentIndex);
-          const letter = letters[currentIndex];
-          const audio = audioCache[letter];
+          const segment = segments[currentIndex];
+          const soundKey = getSoundKeyForSegment(segment);
+          const audio = audioCache[soundKey];
           if (audio) {
             audio.onended = () => {
               currentIndex++;
-              playNextLetter();
+              playNextSegment();
             };
             audio.currentTime = 0;
             audio.play().catch(e => {
@@ -94,7 +96,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             });
           } else {
             currentIndex++;
-            playNextLetter();
+            playNextSegment();
           }
         } else {
           setHighlightedIndex(null);
@@ -102,7 +104,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         }
       };
 
-      playNextLetter();
+      playNextSegment();
     }
   }
 
@@ -155,12 +157,14 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             transform: `translateY(${content.verticalOffset || 0}em)`,
             transition: 'transform 0.2s ease-out'
           }}>
-            {content.value.split('').map((letter, index) => (
+            {splitIntoPhonicsSegments(content.value).map((segment, index) => (
               <span key={index} className={cn(
-                highlightedIndex === index && "opacity-50",
-                highlightedIndex === null && "opacity-100 transition-opacity duration-500"
+                "inline-block transition-all duration-300 ease-in-out",
+                highlightedIndex !== null && highlightedIndex !== index && "opacity-60",
+                highlightedIndex === index && "scale-110 brightness-110 [text-shadow:0_0_10px_rgba(255,255,255,0.4)]",
+                highlightedIndex === null && "opacity-100 scale-100 transition-opacity duration-300"
               )}>
-                {letter}
+                {segment}
               </span>
             ))}
           </div>
