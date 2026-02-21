@@ -48,6 +48,17 @@ export function RecordingsModal({ open, onOpenChange }: RecordingsModalProps) {
         }
     };
 
+    const handleClearAll = async () => {
+        if (confirm("Are you sure you want to delete all recordings? This cannot be undone.")) {
+            try {
+                await audioStorage.clearAllRecordings();
+                setRecordings([]);
+            } catch (error) {
+                console.error("Failed to clear all recordings:", error);
+            }
+        }
+    };
+
     const handlePlay = async (key: string) => {
         try {
             const blob = await audioStorage.getRecording(key);
@@ -64,79 +75,82 @@ export function RecordingsModal({ open, onOpenChange }: RecordingsModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl w-full h-full sm:h-auto sm:max-h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none sm:border sm:rounded-2xl bg-background/95 backdrop-blur-md shadow-2xl">
-                <DialogHeader className="p-6 pb-4 border-b border-white/5 relative bg-background/50">
-                    <DialogTitle className="text-2xl font-headline flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-white/5 text-white/70">
-                            <Play className="w-5 h-5" />
-                        </div>
+            <DialogContent className="max-w-2xl w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none sm:border sm:rounded-2xl bg-background/95 backdrop-blur-md shadow-2xl [&>button]:hidden fixed inset-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]">
+                <DialogHeader className="p-6 pb-4 border-b border-border bg-background/50 flex flex-row items-center justify-start gap-4 shrink-0">
+                    <DialogTitle className="text-xl sm:text-2xl font-headline">
                         Manage Recordings
                     </DialogTitle>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onOpenChange(false)}
-                        className="absolute left-6 top-6 sm:hidden text-foreground/50 hover:text-foreground"
-                    >
-                        <X className="h-6 w-6" />
-                    </Button>
                 </DialogHeader>
 
-                <ScrollArea className="flex-1 px-4 py-2">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-foreground/30 animate-pulse">
-                            <MicOff className="w-12 h-12 mb-4" />
-                            <p>Loading your recordings...</p>
-                        </div>
-                    ) : recordings.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-foreground/30">
-                            <MicOff className="w-12 h-12 mb-4" />
-                            <p className="text-lg">No custom recordings yet.</p>
-                            <p className="text-sm">Record sounds on the cards to see them here.</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-2 p-2">
-                            {recordings.map((key) => (
-                                <div
-                                    key={key}
-                                    className="group flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all duration-300"
-                                >
-                                    <span className="text-xl font-medium capitalize flex-1 truncate pr-4">
-                                        {key}
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handlePlay(key)}
-                                            className="h-10 w-10 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-                                            title="Play"
-                                        >
-                                            <Play className="h-5 w-5 fill-current" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDelete(key)}
-                                            className="h-10 w-10 text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="h-5 w-5" />
-                                        </Button>
+                <div className="flex-1 min-h-0 relative">
+                    <div className="absolute inset-0 overflow-y-auto px-4 py-2 scroll-smooth overscroll-contain [touch-action:pan-y]">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center h-64 text-foreground/30 animate-pulse">
+                                <MicOff className="w-12 h-12 mb-4" />
+                                <p>Loading your recordings...</p>
+                            </div>
+                        ) : recordings.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-64 text-foreground/30">
+                                <MicOff className="w-12 h-12 mb-4" />
+                                <p className="text-lg">No custom recordings yet.</p>
+                                <p className="text-sm">Record sounds on the cards to see them here.</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-2 p-2">
+                                {recordings.map((key) => (
+                                    <div
+                                        key={key}
+                                        className="group flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-border/50 transition-all duration-300"
+                                    >
+                                        <span className="text-xl font-medium flex-1 truncate pr-4 text-foreground">
+                                            {key}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handlePlay(key)}
+                                                className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                                                title="Play"
+                                            >
+                                                <Play className="h-5 w-5 fill-current" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDelete(key)}
+                                                className="h-10 w-10 text-red-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </ScrollArea>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                <div className="p-4 border-t border-white/5 bg-background/50 flex justify-end">
+                <div className="p-4 border-t border-border bg-background/50 flex items-center justify-between shrink-0">
+                    <div>
+                        {recordings.length > 0 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleClearAll}
+                                className="text-red-500 hover:text-red-400 hover:bg-red-500/10 h-10 px-4 rounded-xl text-sm font-medium"
+                            >
+                                Clear All
+                            </Button>
+                        )}
+                    </div>
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
-                        className="hidden sm:inline-flex rounded-xl border-white/10 hover:bg-white/5"
+                        className="rounded-xl border-border hover:bg-accent h-10 px-6 sm:inline-flex"
                     >
-                        Close
+                        {recordings.length === 0 ? "Close" : "Done"}
                     </Button>
                 </div>
             </DialogContent>

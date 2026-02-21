@@ -349,7 +349,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           {localAudioUrl ? (
             <Button
               variant="ghost"
-              className="h-12 w-12 p-0 text-white/30 hover:text-red-400 hover:bg-white/10 transition-all duration-300"
+              className="h-12 w-12 p-0 text-red-500 hover:text-red-400 hover:bg-white/10 transition-all duration-300"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteRecording();

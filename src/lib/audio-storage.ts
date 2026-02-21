@@ -65,6 +65,17 @@ export class AudioStorage {
             request.onerror = () => reject(request.error);
         });
     }
+
+    async clearAllRecordings() {
+        await this.init();
+        return new Promise<void>((resolve, reject) => {
+            const transaction = this.db!.transaction(this.storeName, "readwrite");
+            const store = transaction.objectStore(this.storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
 }
 
 export const audioStorage = new AudioStorage();

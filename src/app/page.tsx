@@ -141,8 +141,8 @@ export default function Home() {
 
   // Update ref when state changes
   useEffect(() => {
-    isMenuOpenRef.current = isMenuOpen || isSettingsOpen;
-  }, [isMenuOpen, isSettingsOpen]);
+    isMenuOpenRef.current = isMenuOpen || isSettingsOpen || isRecordingsModalOpen;
+  }, [isMenuOpen, isSettingsOpen, isRecordingsModalOpen]);
 
   const availableLetters = useMemo(() => {
     return selectedLetters.length > 0 ? selectedLetters : [];
