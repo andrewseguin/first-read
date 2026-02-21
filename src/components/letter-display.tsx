@@ -289,7 +289,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           {localAudioUrl ? (
             <Button
               variant="ghost"
-              className="h-12 w-12 p-0 text-white/30 hover:text-red-400 transition-all duration-300"
+              className="h-12 w-12 p-0 text-white/30 hover:text-red-400 hover:bg-white/10 transition-all duration-300"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteRecording();
@@ -303,7 +303,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             <Button
               variant="ghost"
               className={cn(
-                "h-12 w-12 p-0 transition-all duration-300",
+                "h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
                 isRecording ? "text-red-500 scale-110 animate-pulse bg-red-500/10" : "text-white/50 hover:text-white"
               )}
               onClick={(e) => {
