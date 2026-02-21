@@ -29,11 +29,12 @@ type DisplayContent = {
 
 type LetterDisplayProps = {
   content: DisplayContent;
+  enableRecordings: boolean;
 };
 
 import { useAudio } from "@/components/AudioProvider";
 
-export function LetterDisplay({ content }: LetterDisplayProps) {
+export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioCache = useAudio();
 
@@ -178,7 +179,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     }
 
     // Try playing local recording first
-    if (localAudioUrl) {
+    if (localAudioUrl && enableRecordings) {
       playLocalRecording();
       return;
     }
@@ -215,7 +216,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     abortControllerRef.current = abortController;
     const signal = abortController.signal;
 
-    if (localAudioUrl) {
+    if (localAudioUrl && enableRecordings) {
       playLocalRecording();
       return;
     }
@@ -347,10 +348,10 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           </span>
         )}
         <div className="absolute bottom-4 left-4 flex items-center gap-1">
-          {localAudioUrl ? (
+          {enableRecordings && (localAudioUrl ? (
             <Button
               variant="ghost"
-              className="h-12 w-12 p-0 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300"
+              className="h-12 w-12 p-0 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-30"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteRecording();
@@ -379,7 +380,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             >
               {isRecording ? <StopCircle className="h-6 w-6 fill-current" /> : <Mic className="h-6 w-6" />}
             </Button>
-          )}
+          ))}
         </div>
 
         {content.type === "letter" && (
@@ -401,7 +402,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             />
           </Button>
         )}
-        {content.type === "word" && (content.isHardWord ? localAudioUrl : true) && (
+        {content.type === "word" && (content.isHardWord ? (localAudioUrl && enableRecordings) : true) && (
           <Button
             variant="ghost"
             className={cn(

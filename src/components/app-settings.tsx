@@ -16,6 +16,8 @@ type AppSettingsProps = {
   onShowCardCountChange: (show: boolean) => void;
   showTimer: boolean;
   onShowTimerChange: (show: boolean) => void;
+  enableRecordings: boolean;
+  onEnableRecordingsChange: (show: boolean) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenRecordings: () => void;
@@ -26,6 +28,8 @@ export function AppSettings({
   onShowCardCountChange,
   showTimer,
   onShowTimerChange,
+  enableRecordings,
+  onEnableRecordingsChange,
   open,
   onOpenChange,
   onOpenRecordings,
@@ -78,6 +82,16 @@ export function AppSettings({
                 id="timer-toggle"
                 checked={showTimer}
                 onCheckedChange={onShowTimerChange}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="recordings-toggle" className="text-base">
+                Enable Recordings
+              </Label>
+              <Switch
+                id="recordings-toggle"
+                checked={enableRecordings}
+                onCheckedChange={onEnableRecordingsChange}
               />
             </div>
             <div className="pt-2">

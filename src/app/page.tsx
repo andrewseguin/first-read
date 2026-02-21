@@ -84,6 +84,10 @@ export default function Home() {
     "first-read-show-timer",
     true
   );
+  const [enableRecordings, setEnableRecordings] = useLocalStorage<boolean>(
+    "first-read-enable-recordings",
+    true
+  );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -556,7 +560,7 @@ export default function Home() {
       onPointerUp={handlePointerUp}
       tabIndex={-1}
     >
-      <LetterDisplay content={displayContent} />
+      <LetterDisplay content={displayContent} enableRecordings={enableRecordings} />
       {!isFullscreen && (
         <div className="absolute top-4 right-4 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
           <LetterSelector
@@ -576,6 +580,8 @@ export default function Home() {
             onShowCardCountChange={setShowCardCount}
             showTimer={showTimer}
             onShowTimerChange={setShowTimer}
+            enableRecordings={enableRecordings}
+            onEnableRecordingsChange={setEnableRecordings}
             open={isSettingsOpen}
             onOpenChange={handleSettingsOpenChange}
             onOpenRecordings={() => setIsRecordingsModalOpen(true)}
