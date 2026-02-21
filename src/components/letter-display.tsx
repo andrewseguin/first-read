@@ -15,6 +15,7 @@ import {
 import { splitIntoPhonicsSegments, getSoundKeyForSegment } from "@/lib/phonics";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { audioStorage } from "@/lib/audio-storage";
+import { AudioVisualizer } from "./audio-visualizer";
 
 type DisplayContent = {
   key: string;
@@ -41,7 +42,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const recordingValueRef = useRef<string | null>(null);
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder();
+  const { isRecording, stream, startRecording, stopRecording } = useAudioRecorder();
 
   const stopPlayback = () => {
     if (abortControllerRef.current) {
@@ -416,6 +417,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             />
           </Button>
         )}
+        {isRecording && <AudioVisualizer stream={stream} />}
       </CardContent>
     </Card>
   );
