@@ -42,7 +42,13 @@ export function AppSettings({
           <Settings className="h-6 w-6" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[90vw] sm:w-[300px]" align="center" onPointerDown={(e) => e.stopPropagation()}>
+      <PopoverContent
+        className="w-[90vw] sm:w-[300px]"
+        align="center"
+        sideOffset={8}
+        collisionPadding={16}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <div className="grid gap-8">
           <div className="space-y-4">
             <h4 className="font-medium leading-none font-headline text-lg">
