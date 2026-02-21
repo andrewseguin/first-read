@@ -286,23 +286,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           </span>
         )}
         <div className="absolute bottom-4 left-4 flex items-center gap-1">
-          <Button
-            variant="ghost"
-            className={cn(
-              "h-12 w-12 p-0 transition-all duration-300",
-              isRecording ? "text-red-500 scale-110 animate-pulse bg-red-500/10" : "text-white/50 hover:text-white"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleToggleRecording();
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            title={isRecording ? "Stop Recording" : "Record your own voice"}
-          >
-            {isRecording ? <StopCircle className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-          </Button>
-
-          {localAudioUrl && (
+          {localAudioUrl ? (
             <Button
               variant="ghost"
               className="h-12 w-12 p-0 text-white/30 hover:text-red-400 transition-all duration-300"
@@ -314,6 +298,22 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
               title="Delete recording"
             >
               <Trash2 className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              className={cn(
+                "h-12 w-12 p-0 transition-all duration-300",
+                isRecording ? "text-red-500 scale-110 animate-pulse bg-red-500/10" : "text-white/50 hover:text-white"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleRecording();
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              title={isRecording ? "Stop Recording" : "Record your own voice"}
+            >
+              {isRecording ? <StopCircle className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
             </Button>
           )}
         </div>
