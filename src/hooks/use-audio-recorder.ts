@@ -1,6 +1,7 @@
 
 import { useState, useRef, useCallback } from "react";
 
+
 export function useAudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -11,7 +12,7 @@ export function useAudioRecorder() {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setStream(mediaStream);
-            const mediaRecorder = new NewMediaRecorder(mediaStream);
+            const mediaRecorder = new MediaRecorder(mediaStream);
             mediaRecorderRef.current = mediaRecorder;
             chunksRef.current = [];
 
@@ -56,8 +57,3 @@ export function useAudioRecorder() {
         stopRecording,
     };
 }
-
-// Add a type helper for MediaRecorder if needed, though standard should work.
-// Using 'any' briefly to bypass the track.stop() lint error if it persists, 
-// but better to just use standard MediaRecorder.
-const NewMediaRecorder = (window as any).MediaRecorder || (window as any).webkitMediaRecorder;

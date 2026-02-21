@@ -364,8 +364,10 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             <Button
               variant="ghost"
               className={cn(
-                "h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
-                isRecording ? "text-red-500 scale-110 animate-pulse bg-red-500/10" : "text-white/50 hover:text-white"
+                "h-12 w-12 p-0 transition-all duration-300 rounded-full",
+                isRecording
+                  ? "bg-red-600 text-white scale-110 animate-pulse hover:bg-red-700 shadow-lg"
+                  : "text-white/50 hover:text-white hover:bg-white/10"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -373,8 +375,9 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
               }}
               onPointerDown={(e) => e.stopPropagation()}
               title={isRecording ? "Stop Recording" : "Record your own voice"}
+              data-recording-button="true"
             >
-              {isRecording ? <StopCircle className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+              {isRecording ? <StopCircle className="h-6 w-6 fill-current" /> : <Mic className="h-6 w-6" />}
             </Button>
           )}
         </div>
