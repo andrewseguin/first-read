@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Star, Volume2 } from "lucide-react"; // Import the Star and Volume2 icons
+import { Star, Volume2, Mic, Play, Trash2, StopCircle } from "lucide-react"; // Import necessary icons
 import { Button } from "@/components/ui/button"; // Import Button component
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"; // Import tooltip components
 import { splitIntoPhonicsSegments, getSoundKeyForSegment } from "@/lib/phonics";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { audioStorage } from "@/lib/audio-storage";
 
 type DisplayContent = {
   key: string;
@@ -35,8 +37,10 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   const audioCache = useAudio();
 
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { isRecording, startRecording, stopRecording } = useAudioRecorder();
 
   const stopPlayback = () => {
     if (abortControllerRef.current) {
@@ -48,9 +52,6 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
       currentAudioRef.current.currentTime = 0;
       currentAudioRef.current = null;
     }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
     setIsPlaying(false);
     setHighlightedIndex(null);
   };
@@ -58,12 +59,73 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   useEffect(() => {
     // Abort playback when content changes or component unmounts
     stopPlayback();
-    return () => stopPlayback();
+    loadLocalRecording();
+    return () => {
+      stopPlayback();
+      if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+    };
   }, [content.key]);
+
+  const loadLocalRecording = async () => {
+    const blob = await audioStorage.getRecording(content.value);
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      setLocalAudioUrl(url);
+    } else {
+      setLocalAudioUrl(null);
+    }
+  };
+
+  const handleToggleRecording = async () => {
+    if (isRecording) {
+      const blob = await stopRecording();
+      await audioStorage.saveRecording(content.value, blob);
+      const url = URL.createObjectURL(blob);
+      if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+      setLocalAudioUrl(url);
+    } else {
+      stopPlayback();
+      await startRecording();
+    }
+  };
+
+  const handleDeleteRecording = async () => {
+    await audioStorage.deleteRecording(content.value);
+    if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+    setLocalAudioUrl(null);
+  };
+
+  const playLocalRecording = () => {
+    if (localAudioUrl) {
+      stopPlayback();
+      const audio = new Audio(localAudioUrl);
+      setIsPlaying(true);
+      currentAudioRef.current = audio;
+      audio.onended = () => {
+        setIsPlaying(false);
+        currentAudioRef.current = null;
+      };
+      audio.play().catch(e => {
+        console.error("Error playing local recording:", e);
+        setIsPlaying(false);
+      });
+    }
+  };
 
   function speakLetter(event: React.MouseEvent) {
     event.stopPropagation();
-    if (audioCache && !isPlaying) {
+    if (isPlaying) {
+      stopPlayback();
+      return;
+    }
+
+    // Try playing local recording first
+    if (localAudioUrl) {
+      playLocalRecording();
+      return;
+    }
+
+    if (audioCache) {
       const audio = audioCache[content.value.toLowerCase()];
       if (audio) {
         setIsPlaying(true);
@@ -78,8 +140,6 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           currentAudioRef.current = null;
         });
       }
-    } else if (isPlaying) {
-      stopPlayback();
     }
   }
 
@@ -94,93 +154,59 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     abortControllerRef.current = abortController;
     const signal = abortController.signal;
 
-    if (content.isHardWord) {
-      // For hard words, just say the word
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(content.value);
-        utterance.rate = 0.8;
-        utterance.pitch = 1.2;
-        utterance.onstart = () => {
-          if (signal.aborted) return;
-          setIsPlaying(true);
-        };
-        utterance.onend = () => {
-          setIsPlaying(false);
-          if (abortControllerRef.current === abortController) {
-            abortControllerRef.current = null;
-          }
-        };
-        window.speechSynthesis.speak(utterance);
-      }
-    } else {
-      // For easy and medium words, sound it out
-      if (!audioCache) return;
-
-      const segments = splitIntoPhonicsSegments(content.value);
-      let currentIndex = 0;
-      setIsPlaying(true);
-
-      const playNextSegment = () => {
-        if (signal.aborted) return;
-
-        if (currentIndex < segments.length) {
-          setHighlightedIndex(currentIndex);
-          const segment = segments[currentIndex];
-          const soundKey = getSoundKeyForSegment(segment);
-          const audio = audioCache[soundKey];
-
-          if (audio) {
-            currentAudioRef.current = audio;
-            audio.onended = () => {
-              if (signal.aborted) return;
-              currentIndex++;
-              playNextSegment();
-            };
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-              console.error("Error playing audio, falling back to speech synthesis:", e);
-              if (signal.aborted) return;
-              speakSegmentWithFallback(segment, () => {
-                if (signal.aborted) return;
-                currentIndex++;
-                playNextSegment();
-              });
-            });
-          } else {
-            // No audio file found, fallback to speech synthesis
-            speakSegmentWithFallback(segment, () => {
-              if (signal.aborted) return;
-              currentIndex++;
-              playNextSegment();
-            });
-          }
-        } else {
-          setHighlightedIndex(null);
-          setIsPlaying(false);
-          if (abortControllerRef.current === abortController) {
-            abortControllerRef.current = null;
-          }
-        }
-      };
-
-      const speakSegmentWithFallback = (text: string, onEnd: () => void) => {
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.rate = 0.7; // Slightly slower for clarity
-          utterance.pitch = 1.2;
-          utterance.onend = onEnd;
-          utterance.onerror = (e) => {
-            console.error("Speech synthesis error:", e);
-            onEnd();
-          };
-          window.speechSynthesis.speak(utterance);
-        } else {
-          onEnd();
-        }
-      };
-
-      playNextSegment();
+    if (localAudioUrl) {
+      playLocalRecording();
+      return;
     }
+
+    if (content.isHardWord) return;
+
+    if (!audioCache) return;
+
+    const segments = splitIntoPhonicsSegments(content.value);
+    let currentIndex = 0;
+    setIsPlaying(true);
+
+    const playNextSegment = () => {
+      if (signal.aborted) return;
+
+      if (currentIndex < segments.length) {
+        setHighlightedIndex(currentIndex);
+        const segment = segments[currentIndex];
+        const soundKey = getSoundKeyForSegment(segment);
+        const audio = audioCache[soundKey];
+
+        if (audio) {
+          currentAudioRef.current = audio;
+          audio.onended = () => {
+            if (signal.aborted) return;
+            currentIndex++;
+            playNextSegment();
+          };
+          audio.currentTime = 0;
+          audio.play().catch(e => {
+            console.error("Error playing audio:", e);
+            if (signal.aborted) return;
+            currentIndex++;
+            playNextSegment();
+          });
+        } else {
+          // No audio file found, skip
+          if (signal.aborted) return;
+          currentIndex++;
+          playNextSegment();
+        }
+      } else {
+        setHighlightedIndex(null);
+        setIsPlaying(false);
+        if (abortControllerRef.current === abortController) {
+          abortControllerRef.current = null;
+        }
+      }
+    };
+
+
+    playNextSegment();
   }
 
   if (content.type === "message") {
@@ -259,6 +285,41 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             {content.value}
           </span>
         )}
+        <div className="absolute bottom-4 left-4 flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "transition-all duration-300",
+              isRecording ? "text-red-500 scale-110 animate-pulse bg-red-500/10" : "text-white/50 hover:text-white"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleRecording();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            title={isRecording ? "Stop Recording" : "Record your own voice"}
+          >
+            {isRecording ? <StopCircle className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+          </Button>
+
+          {localAudioUrl && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white/30 hover:text-red-400 transition-all duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteRecording();
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              title="Delete recording"
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
+
         {content.type === "letter" && (
           <Button
             variant="ghost"
@@ -279,7 +340,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             />
           </Button>
         )}
-        {content.type === "word" && (
+        {content.type === "word" && (content.isHardWord ? localAudioUrl : true) && (
           <Button
             variant="ghost"
             size="icon-lg"
