@@ -22,6 +22,7 @@ type DisplayContent = {
   textColor?: string;
   verticalOffset?: number;
   isHardWord?: boolean; // New property to indicate if the word is hard
+  isMediumWord?: boolean; // New property for words with special sounds
 };
 
 type LetterDisplayProps = {
@@ -70,7 +71,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         window.speechSynthesis.speak(utterance);
       }
     } else {
-      // For easy words, sound it out
+      // For easy and medium words, sound it out
       if (!audioCache) return;
 
       const segments = splitIntoPhonicsSegments(content.value);
@@ -83,6 +84,7 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
           const segment = segments[currentIndex];
           const soundKey = getSoundKeyForSegment(segment);
           const audio = audioCache[soundKey];
+
           if (audio) {
             audio.onended = () => {
               currentIndex++;
@@ -90,17 +92,38 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
             };
             audio.currentTime = 0;
             audio.play().catch(e => {
-              console.error("Error playing audio:", e);
-              setIsPlaying(false);
-              setHighlightedIndex(null);
+              console.error("Error playing audio, falling back to speech synthesis:", e);
+              speakSegmentWithFallback(segment, () => {
+                currentIndex++;
+                playNextSegment();
+              });
             });
           } else {
-            currentIndex++;
-            playNextSegment();
+            // No audio file found, fallback to speech synthesis
+            speakSegmentWithFallback(segment, () => {
+              currentIndex++;
+              playNextSegment();
+            });
           }
         } else {
           setHighlightedIndex(null);
           setIsPlaying(false);
+        }
+      };
+
+      const speakSegmentWithFallback = (text: string, onEnd: () => void) => {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.7; // Slightly slower for clarity
+          utterance.pitch = 1.2;
+          utterance.onend = onEnd;
+          utterance.onerror = (e) => {
+            console.error("Speech synthesis error:", e);
+            onEnd();
+          };
+          window.speechSynthesis.speak(utterance);
+        } else {
+          onEnd();
         }
       };
 
@@ -132,16 +155,19 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         borderLeft: "1px solid rgba(255,255,255,0.1)",
       }}
     >
-      {content.type === "word" && content.isHardWord && (
+      {content.type === "word" && (content.isHardWord || content.isMediumWord) && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="absolute top-4 right-4 text-foreground/50">
+              <div className={cn(
+                "absolute top-4 right-4",
+                content.isHardWord ? "text-foreground/50" : "text-yellow-500/50"
+              )}>
                 <Star className="h-6 w-6" />
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Hard Word</p>
+              <p>{content.isHardWord ? "Hard Word" : "Medium Word"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

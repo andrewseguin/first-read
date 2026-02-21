@@ -1,12 +1,9 @@
 /**
  * Splits a word into phonics segments, grouping certain letter combinations.
  * Currently supports:
- * - "ll" (double L)
- * - "tt" (double T)
- * - "ss" (double S)
- * - "ff" (double F)
- * - "zz" (double Z)
- * - "ck" (digraph)
+ * - "ll", "tt", "ss", "ff", "zz", "ck"
+ * - Digraphs: "sh", "ch", "th", "wh", "oo", "ee", "ea", "oa", "ai", "ay"
+ * - R-controlled: "ar", "er", "ir", "or", "ur"
  */
 export function splitIntoPhonicsSegments(word: string): string[] {
     const segments: string[] = [];
@@ -17,14 +14,29 @@ export function splitIntoPhonicsSegments(word: string): string[] {
         const nextChar = word[i + 1]?.toLowerCase();
         const currentPair = currentChar + nextChar;
 
-        if (
-            currentPair === "ll" ||
+        const combined = (currentPair === "ll" ||
             currentPair === "tt" ||
             currentPair === "ck" ||
             currentPair === "ss" ||
             currentPair === "ff" ||
-            currentPair === "zz"
-        ) {
+            currentPair === "zz" ||
+            currentPair === "sh" ||
+            currentPair === "ch" ||
+            currentPair === "th" ||
+            currentPair === "wh" ||
+            currentPair === "oo" ||
+            currentPair === "ee" ||
+            currentPair === "ea" ||
+            currentPair === "oa" ||
+            currentPair === "ai" ||
+            currentPair === "ay" ||
+            currentPair === "ar" ||
+            currentPair === "er" ||
+            currentPair === "ir" ||
+            currentPair === "or" ||
+            currentPair === "ur");
+
+        if (combined) {
             segments.push(word.substring(i, i + 2));
             i += 2;
         } else {
@@ -49,5 +61,6 @@ export function getSoundKeyForSegment(segment: string): string {
     if (lowerSegment === "ff") return "f";
     if (lowerSegment === "zz") return "z";
 
+    // For others, we might have audio files or we'll use speech synthesis fallback
     return lowerSegment;
 }
