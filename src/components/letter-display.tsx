@@ -341,9 +341,8 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
         {content.type === "word" && (content.isHardWord ? localAudioUrl : true) && (
           <Button
             variant="ghost"
-            size="icon-lg"
             className={cn(
-              "absolute bottom-4 right-4 transition-all duration-300 hover:bg-white/10",
+              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
               isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakWord(e)}
