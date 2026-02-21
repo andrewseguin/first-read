@@ -57,8 +57,14 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   };
 
   useEffect(() => {
-    // Abort playback when content changes or component unmounts
-    stopPlayback();
+    // Abort playback and stop recording when content changes or component unmounts
+    const stopEverything = async () => {
+      stopPlayback();
+      if (isRecording) {
+        await handleToggleRecording();
+      }
+    };
+    stopEverything();
     loadLocalRecording();
     return () => {
       stopPlayback();
@@ -79,15 +85,33 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
   const handleToggleRecording = async () => {
     if (isRecording) {
       const blob = await stopRecording();
-      await audioStorage.saveRecording(content.value, blob);
-      const url = URL.createObjectURL(blob);
-      if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
-      setLocalAudioUrl(url);
+      if (blob && blob.size > 0) {
+        await audioStorage.saveRecording(content.value, blob);
+        const url = URL.createObjectURL(blob);
+        if (localAudioUrl) URL.revokeObjectURL(localAudioUrl);
+        setLocalAudioUrl(url);
+      }
     } else {
       stopPlayback();
       await startRecording();
     }
   };
+
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const handleGlobalClick = async (e: MouseEvent) => {
+      // If the click is on the recording button itself, handleToggleRecording will deal with it
+      // Otherwise, we stop and save.
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-recording-button="true"]')) {
+        await handleToggleRecording();
+      }
+    };
+
+    window.addEventListener("click", handleGlobalClick, true);
+    return () => window.removeEventListener("click", handleGlobalClick, true);
+  }, [isRecording, handleToggleRecording]);
 
   const handleDeleteRecording = async () => {
     await audioStorage.deleteRecording(content.value);
@@ -112,8 +136,11 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     }
   };
 
-  function speakLetter(event: React.MouseEvent) {
+  async function speakLetter(event: React.MouseEvent) {
     event.stopPropagation();
+    if (isRecording) {
+      await handleToggleRecording();
+    }
     if (isPlaying) {
       stopPlayback();
       return;
@@ -143,8 +170,11 @@ export function LetterDisplay({ content }: LetterDisplayProps) {
     }
   }
 
-  function speakWord(event: React.MouseEvent) {
+  async function speakWord(event: React.MouseEvent) {
     event.stopPropagation();
+    if (isRecording) {
+      await handleToggleRecording();
+    }
     if (isPlaying) {
       stopPlayback();
       return;
