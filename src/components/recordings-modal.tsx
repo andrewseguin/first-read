@@ -75,7 +75,7 @@ export function RecordingsModal({ open, onOpenChange }: RecordingsModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none sm:border sm:rounded-2xl bg-background/95 backdrop-blur-md shadow-2xl [&>button]:hidden fixed inset-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]">
+            <DialogContent className="max-w-2xl w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none sm:border sm:rounded-2xl bg-background/95 backdrop-blur-md shadow-2xl [&>button]:hidden fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
                 <DialogHeader className="p-6 pb-4 border-b border-border bg-background/50 flex flex-row items-center justify-start gap-4 shrink-0">
                     <DialogTitle className="text-xl sm:text-2xl font-headline">
                         Manage Recordings
