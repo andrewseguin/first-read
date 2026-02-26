@@ -36,11 +36,13 @@ import { useAudio } from "@/components/AudioProvider";
 
 export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioCache = useAudio();
+  const audioData = useAudio();
+  const audioContext = audioData?.audioContext;
+  const buffers = audioData?.buffers;
 
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const recordingValueRef = useRef<string | null>(null);
   const { isRecording, stream, startRecording, stopRecording } = useAudioRecorder();
@@ -50,10 +52,11 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
-      currentAudioRef.current = null;
+    if (currentSourceRef.current) {
+      currentSourceRef.current.onended = null;
+      try { currentSourceRef.current.stop(); } catch (e) { }
+      currentSourceRef.current.disconnect();
+      currentSourceRef.current = null;
     }
     setIsPlaying(false);
     setHighlightedIndex(null);
@@ -151,20 +154,33 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     setLocalAudioUrl(null);
   };
 
-  const playLocalRecording = () => {
-    if (localAudioUrl) {
+  const playLocalRecording = async () => {
+    if (localAudioUrl && audioContext) {
       stopPlayback();
-      const audio = new Audio(localAudioUrl);
       setIsPlaying(true);
-      currentAudioRef.current = audio;
-      audio.onended = () => {
+      try {
+        const response = await fetch(localAudioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        currentSourceRef.current = source;
+
+        source.onended = () => {
+          setIsPlaying(false);
+          currentSourceRef.current = null;
+        };
+        source.start(0);
+      } catch (e) {
+        console.error("Error decoding local recording:", e);
         setIsPlaying(false);
-        currentAudioRef.current = null;
-      };
-      audio.play().catch(e => {
-        console.error("Error playing local recording:", e);
-        setIsPlaying(false);
-      });
+      }
     }
   };
 
@@ -184,20 +200,25 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
       return;
     }
 
-    if (audioCache) {
-      const audio = audioCache[content.value.toLowerCase()];
-      if (audio) {
+    if (buffers && audioContext) {
+      const buffer = buffers[content.value.toLowerCase()];
+      if (buffer) {
         setIsPlaying(true);
-        currentAudioRef.current = audio;
-        audio.onended = () => {
+
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        currentSourceRef.current = source;
+
+        source.onended = () => {
           setIsPlaying(false);
-          currentAudioRef.current = null;
+          currentSourceRef.current = null;
         };
-        audio.play().catch(e => {
-          console.error("Error playing audio:", e)
-          setIsPlaying(false);
-          currentAudioRef.current = null;
-        });
+        source.start(0);
       }
     }
   }
@@ -223,7 +244,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
     if (content.isHardWord) return;
 
-    if (!audioCache) return;
+    if (!buffers || !audioContext) return;
 
     const segments = splitIntoPhonicsSegments(content.value);
     let currentIndex = 0;
@@ -236,22 +257,25 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
         setHighlightedIndex(currentIndex);
         const segment = segments[currentIndex];
         const soundKey = getSoundKeyForSegment(segment);
-        const audio = audioCache[soundKey];
+        const buffer = buffers[soundKey];
 
-        if (audio) {
-          currentAudioRef.current = audio;
-          audio.onended = () => {
+        if (buffer) {
+          if (audioContext.state === 'suspended') {
+            audioContext.resume();
+          }
+
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioContext.destination);
+          currentSourceRef.current = source;
+
+          source.onended = () => {
             if (signal.aborted) return;
             currentIndex++;
             playNextSegment();
           };
-          audio.currentTime = 0;
-          audio.play().catch(e => {
-            console.error("Error playing audio:", e);
-            if (signal.aborted) return;
-            currentIndex++;
-            playNextSegment();
-          });
+
+          source.start(0);
         } else {
           // No audio file found, skip
           if (signal.aborted) return;
@@ -266,7 +290,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
         }
       }
     };
-
 
     playNextSegment();
   }
