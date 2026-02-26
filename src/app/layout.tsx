@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import { AudioProvider } from "@/components/AudioProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -25,6 +26,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="b8c360e4-fa3b-4800-bcf7-259c2fe5a061"
+        />
       </head>
       <body className="font-body antialiased">
         <AudioProvider>
