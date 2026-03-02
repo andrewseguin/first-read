@@ -135,17 +135,31 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
   useEffect(() => {
     if (!isRecording) return;
 
-    const handleGlobalClick = async (e: MouseEvent) => {
-      // If the click is on the recording button itself, handleToggleRecording will deal with it
-      // Otherwise, we stop and save.
+    const handleGlobalInteraction = async (e: Event) => {
+      // We catch this in the capture phase to intercept before menus or navigation triggers
+
+      // If the click is on the recording button itself, we let it through so handleToggleRecording can handle it normally
       const target = e.target as HTMLElement;
-      if (!target.closest('[data-recording-button="true"]')) {
-        await handleToggleRecording();
+      if (target.closest('[data-recording-button="true"]')) {
+        return;
       }
+
+      // For anything else, we stop the event immediately and stop recording
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      await handleToggleRecording();
     };
 
-    window.addEventListener("click", handleGlobalClick, true);
-    return () => window.removeEventListener("click", handleGlobalClick, true);
+    // Use capturing phase to intercept events before they reach other handlers
+    window.addEventListener("pointerdown", handleGlobalInteraction, true);
+    window.addEventListener("click", handleGlobalInteraction, true);
+
+    return () => {
+      window.removeEventListener("pointerdown", handleGlobalInteraction, true);
+      window.removeEventListener("click", handleGlobalInteraction, true);
+    };
   }, [isRecording, handleToggleRecording]);
 
   const handleDeleteRecording = async () => {
