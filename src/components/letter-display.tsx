@@ -164,7 +164,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
         if (audioContext.state === 'suspended') {
-          audioContext.resume();
+          await audioContext.resume();
         }
 
         const source = audioContext.createBufferSource();
@@ -206,7 +206,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
         setIsPlaying(true);
 
         if (audioContext.state === 'suspended') {
-          audioContext.resume();
+          await audioContext.resume();
         }
 
         const source = audioContext.createBufferSource();
@@ -261,7 +261,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
         if (buffer) {
           if (audioContext.state === 'suspended') {
-            audioContext.resume();
+            audioContext.resume(); // We don't await here to avoid delaying the chain too much, but it's called in user-gesture
           }
 
           const source = audioContext.createBufferSource();

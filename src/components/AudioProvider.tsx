@@ -2,10 +2,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { AudioUnlocker } from './AudioUnlocker';
 
 type AudioContextType = {
   audioContext: AudioContext | null;
   buffers: Record<string, AudioBuffer>;
+  isReady: boolean;
 };
 
 const Context = createContext<AudioContextType | null>(null);
@@ -20,12 +22,18 @@ let globalAudioContext: AudioContext | null = null;
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [buffers, setBuffers] = useState<Record<string, AudioBuffer>>({});
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
     if (!globalAudioContext) {
-      globalAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        globalAudioContext = new AudioContextClass();
+        console.log("AudioContext created, initial state:", globalAudioContext.state);
+      }
     }
     const ctx = globalAudioContext;
+    if (!ctx) return;
 
     const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
     const newBuffers: Record<string, AudioBuffer> = {};
@@ -36,12 +44,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       await Promise.all(
         alphabet.map(async (letter) => {
           try {
-            const response = await fetch(`${basePath}/sounds/optimized/alphasounds-${letter}.mp3`);
+            // Updated to load .m4a files which are better for iOS
+            const response = await fetch(`${basePath}/sounds/optimized/alphasounds-${letter}.m4a`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
             newBuffers[letter] = audioBuffer;
           } catch (e) {
-            console.error(`Failed to load audio for ${letter}:`, e);
+            console.warn(`Failed to load audio buffer for ${letter}:`, e);
           }
         })
       );
@@ -51,30 +62,23 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadAudio();
-
-    // Ensure AudioContext is resumed on first user interaction (critical for iOS)
-    const resumeAudio = () => {
-      if (globalAudioContext && globalAudioContext.state === 'suspended') {
-        globalAudioContext.resume();
-      }
-    };
-
-    window.addEventListener('pointerdown', resumeAudio, { once: true });
-    window.addEventListener('touchstart', resumeAudio, { once: true });
-
-    return () => {
-      window.removeEventListener('pointerdown', resumeAudio);
-      window.removeEventListener('touchstart', resumeAudio);
-    };
   }, []);
 
   const value = useMemo(() => ({
     audioContext: globalAudioContext,
-    buffers
-  }), [buffers, isInitialized]);
+    buffers,
+    isReady: isInitialized && isUnlocked
+  }), [buffers, isInitialized, isUnlocked]);
 
   return (
     <Context.Provider value={value}>
+      <AudioUnlocker
+        audioContext={globalAudioContext}
+        onUnlocked={() => {
+          setIsUnlocked(true);
+          console.log("Audio Provider: Audio session is now unlocked");
+        }}
+      />
       {children}
     </Context.Provider>
   );
