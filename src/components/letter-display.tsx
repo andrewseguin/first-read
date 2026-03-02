@@ -156,7 +156,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
   const playLocalRecording = async () => {
     if (localAudioUrl && audioContext) {
-      console.log("LetterDisplay: Playing local recording. Context state:", audioContext.state);
+      console.log(`LetterDisplay: playLocalRecording called. Context state BEFORE: ${audioContext.state}`);
       stopPlayback();
       setIsPlaying(true);
       try {
@@ -166,6 +166,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
+          console.log("LetterDisplay: LocalRecording - Context resumed manually");
         }
 
         const source = audioContext.createBufferSource();
@@ -204,11 +205,12 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     if (buffers && audioContext) {
       const buffer = buffers[content.value.toLowerCase()];
       if (buffer) {
-        console.log(`LetterDisplay: Playing letter sound for ${content.value}. Context state:`, audioContext.state);
+        console.log(`LetterDisplay: speakLetter for ${content.value}. State BEFORE: ${audioContext.state}`);
         setIsPlaying(true);
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
+          console.log("LetterDisplay: speakLetter - Context resumed manually");
         }
 
         const source = audioContext.createBufferSource();
@@ -417,6 +419,8 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
               isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakLetter(e)}
+            onPointerUp={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             style={{ color: 'white' }}
           >
             <Volume2
@@ -435,6 +439,8 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
               isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakWord(e)}
+            onPointerUp={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             style={{ color: 'white' }}
           >
             <Volume2
