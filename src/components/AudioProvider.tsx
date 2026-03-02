@@ -40,6 +40,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
     const loadAudio = async () => {
       const basePath = process.env.NODE_ENV === 'production' ? '/first-read' : '';
+      let loadedCount = 0;
 
       await Promise.all(
         alphabet.map(async (letter) => {
@@ -51,12 +52,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
             newBuffers[letter] = audioBuffer;
+            loadedCount++;
           } catch (e) {
-            console.warn(`Failed to load audio buffer for ${letter}:`, e);
+            console.warn(`AudioProvider: Failed to load ${letter}:`, e);
           }
         })
       );
 
+      console.log(`AudioProvider: Successfully loaded ${loadedCount}/${alphabet.length} sounds`);
       setBuffers(newBuffers);
       setIsInitialized(true);
     };
