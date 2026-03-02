@@ -156,6 +156,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
   const playLocalRecording = async () => {
     if (localAudioUrl && audioContext) {
+      console.log("LetterDisplay: Playing local recording. Context state:", audioContext.state);
       stopPlayback();
       setIsPlaying(true);
       try {
@@ -203,6 +204,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     if (buffers && audioContext) {
       const buffer = buffers[content.value.toLowerCase()];
       if (buffer) {
+        console.log(`LetterDisplay: Playing letter sound for ${content.value}. Context state:`, audioContext.state);
         setIsPlaying(true);
 
         if (audioContext.state === 'suspended') {
@@ -247,6 +249,7 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     if (!buffers || !audioContext) return;
 
     const segments = splitIntoPhonicsSegments(content.value);
+    console.log(`LetterDisplay: Playing word segments for ${content.value}. Context state:`, audioContext.state);
     let currentIndex = 0;
     setIsPlaying(true);
 
@@ -414,7 +417,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
               isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakLetter(e)}
-            onPointerDown={(e) => e.stopPropagation()}
             style={{ color: 'white' }}
           >
             <Volume2
@@ -433,7 +435,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
               isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakWord(e)}
-            onPointerDown={(e) => e.stopPropagation()}
             style={{ color: 'white' }}
           >
             <Volume2
