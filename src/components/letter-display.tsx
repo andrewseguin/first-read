@@ -156,7 +156,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
   const playLocalRecording = async () => {
     if (localAudioUrl && audioContext) {
-      console.log(`LetterDisplay: playLocalRecording called. Context state BEFORE: ${audioContext.state}`);
       stopPlayback();
       setIsPlaying(true);
       try {
@@ -166,7 +165,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
-          console.log("LetterDisplay: LocalRecording - Context resumed manually");
         }
 
         const source = audioContext.createBufferSource();
@@ -205,12 +203,10 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     if (buffers && audioContext) {
       const buffer = buffers[content.value.toLowerCase()];
       if (buffer) {
-        console.log(`LetterDisplay: speakLetter for ${content.value}. State BEFORE: ${audioContext.state}`);
         setIsPlaying(true);
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
-          console.log("LetterDisplay: speakLetter - Context resumed manually");
         }
 
         const source = audioContext.createBufferSource();
@@ -251,7 +247,6 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
     if (!buffers || !audioContext) return;
 
     const segments = splitIntoPhonicsSegments(content.value);
-    console.log(`LetterDisplay: Playing word segments for ${content.value}. Context state:`, audioContext.state);
     let currentIndex = 0;
     setIsPlaying(true);
 

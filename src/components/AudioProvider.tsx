@@ -29,7 +29,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
         globalAudioContext = new AudioContextClass();
-        console.log("AudioContext created, initial state:", globalAudioContext.state);
       }
     }
     const ctx = globalAudioContext;
@@ -59,7 +58,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
-      console.log(`AudioProvider: Successfully loaded ${loadedCount}/${alphabet.length} sounds`);
       setBuffers(newBuffers);
       setIsInitialized(true);
     };
