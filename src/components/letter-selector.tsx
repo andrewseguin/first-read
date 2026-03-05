@@ -22,6 +22,8 @@ type LetterSelectorProps = {
   onWordDifficultyChange: (difficulty: string) => void;
   selectedWordLengths: number[];
   onSelectedWordLengthsChange: (lengths: number[]) => void;
+  letterCase: "lower" | "upper" | "mixed";
+  onLetterCaseChange: (casing: "lower" | "upper" | "mixed") => void;
 };
 
 import { WordDifficultyToggle } from "./word-difficulty-toggle";
@@ -38,6 +40,8 @@ export function LetterSelector({
   onWordDifficultyChange,
   selectedWordLengths,
   onSelectedWordLengthsChange,
+  letterCase,
+  onLetterCaseChange,
 }: LetterSelectorProps) {
   const handleLetterChange = (letter: string, checked: boolean) => {
     setSelectedLetters((prev) => {
@@ -114,6 +118,39 @@ export function LetterSelector({
                 onValueChange={onGameModeChange}
                 className="w-full mb-8"
               />
+              {gameMode === 'letters' && (
+                <div className="mb-8">
+                  <h4 className="font-medium leading-none font-headline text-lg mb-4">
+                    Letter Casing
+                  </h4>
+                  <div className="flex bg-muted p-1 rounded-xl gap-1">
+                    <Button
+                      variant={letterCase === 'lower' ? "default" : "ghost"}
+                      size="sm"
+                      className="flex-1 text-lg py-6"
+                      onClick={() => onLetterCaseChange('lower')}
+                    >
+                      a
+                    </Button>
+                    <Button
+                      variant={letterCase === 'upper' ? "default" : "ghost"}
+                      size="sm"
+                      className="flex-1 text-lg py-6"
+                      onClick={() => onLetterCaseChange('upper')}
+                    >
+                      A
+                    </Button>
+                    <Button
+                      variant={letterCase === 'mixed' ? "default" : "ghost"}
+                      size="sm"
+                      className="flex-1 text-lg py-6"
+                      onClick={() => onLetterCaseChange('mixed')}
+                    >
+                      Aa
+                    </Button>
+                  </div>
+                </div>
+              )}
               {gameMode === 'words' && (
                 <>
                   <div className="mb-8">

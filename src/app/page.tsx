@@ -57,6 +57,10 @@ type DisplayContent = {
 
 export default function Home() {
   const [hydrated, setHydrated] = useState(false);
+  const [letterCase, setLetterCase] = useLocalStorage<"lower" | "upper" | "mixed">(
+    "first-read-letter-case",
+    "lower"
+  );
   const [selectedLetters, setSelectedLetters] = useLocalStorage<string[]>(
     "first-read-selection",
     DEFAULT_LETTERS
@@ -550,7 +554,7 @@ export default function Home() {
       onPointerUp={handlePointerUp}
       tabIndex={-1}
     >
-      <LetterDisplay content={displayContent} enableRecordings={enableRecordings} />
+      <LetterDisplay content={displayContent} enableRecordings={enableRecordings} letterCase={letterCase} />
       {!isFullscreen && (
         <div className="absolute top-4 right-4 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
           <LetterSelector
@@ -564,6 +568,8 @@ export default function Home() {
             onWordDifficultyChange={setWordDifficulty}
             selectedWordLengths={selectedWordLengths}
             onSelectedWordLengthsChange={setSelectedWordLengths}
+            letterCase={letterCase}
+            onLetterCaseChange={setLetterCase}
           />
           <AppSettings
             showCardCount={showCardCount}

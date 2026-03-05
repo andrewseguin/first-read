@@ -30,11 +30,12 @@ type DisplayContent = {
 type LetterDisplayProps = {
   content: DisplayContent;
   enableRecordings: boolean;
+  letterCase?: "lower" | "upper" | "mixed";
 };
 
 import { useAudio } from "@/components/AudioProvider";
 
-export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps) {
+export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioData = useAudio();
   const audioContext = audioData?.audioContext;
@@ -354,36 +355,53 @@ export function LetterDisplay({ content, enableRecordings }: LetterDisplayProps)
             "text-6xl sm:text-8xl md:text-[10rem]"
           )} style={{
             color: content.textColor || 'white',
-            transform: `translateY(${content.verticalOffset || 0}em)`,
+            transform: `translateY(${letterCase === 'lower' ? (content.verticalOffset || 0) : 0}em)`,
             transition: 'transform 0.2s ease-out'
           }}>
-            {splitIntoPhonicsSegments(content.value).map((segment, index) => (
-              <span key={index} className={cn(
-                "inline-block transition-all duration-300 ease-in-out",
-                highlightedIndex !== null && highlightedIndex !== index && "opacity-60",
-                highlightedIndex === index && "scale-110 brightness-110 [text-shadow:0_0_10px_rgba(255,255,255,0.4)]",
-                highlightedIndex === null && "opacity-100 scale-100 transition-opacity duration-300"
-              )}>
-                {segment}
-              </span>
-            ))}
+            {splitIntoPhonicsSegments(content.value).map((segment, index) => {
+              const displaySegment = segment.toLowerCase();
+
+              return (
+                <span key={index} className={cn(
+                  "inline-block transition-all duration-300 ease-in-out",
+                  highlightedIndex !== null && highlightedIndex !== index && "opacity-60",
+                  highlightedIndex === index && "scale-110 brightness-110 [text-shadow:0_0_10px_rgba(255,255,255,0.4)]",
+                  highlightedIndex === null && "opacity-100 scale-100 transition-opacity duration-300"
+                )}>
+                  {displaySegment}
+                </span>
+              );
+            })}
           </div>
-        ) : (
+        ) : (() => {
+          let displayText = content.value;
+          if (letterCase === 'upper') {
+             displayText = content.value.toUpperCase();
+          } else if (letterCase === 'mixed') {
+             displayText = content.value.toUpperCase() + content.value.toLowerCase();
+          } else {
+             displayText = content.value.toLowerCase();
+          }
+
+          return (
           <span
             className={cn(
-              "font-headline font-normal leading-none",
+              "font-headline font-normal leading-none flex items-baseline justify-center gap-0",
               "select-none [text-shadow:3px_3px_6px_rgba(0,0,0,0.2)]",
-              "text-9xl sm:text-[14rem] md:text-[17.5rem]"
+              letterCase === 'mixed' 
+                ? "text-8xl sm:text-[11rem] md:text-[14rem]" 
+                : "text-9xl sm:text-[14rem] md:text-[17.5rem]"
             )}
             style={{
               color: content.textColor || 'white',
-              transform: `translateY(${content.verticalOffset || 0}em)`,
+              transform: `translateY(${letterCase === 'lower' ? (content.verticalOffset || 0) : 0}em)`,
               transition: 'transform 0.2s ease-out'
             }}
           >
-            {content.value}
+            {displayText}
           </span>
-        )}
+          );
+        })()}
         <div className="absolute bottom-4 left-4 flex items-center gap-1">
           {enableRecordings && (localAudioUrl ? (
             <Button
