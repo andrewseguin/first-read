@@ -2,7 +2,7 @@
 
 We are implementing three core features to `first-read`. To maintain stability and a premium UX, we will implement these sequentially, fully testing each phase before clearing its checkpoint and moving to the next.
 
-## Current Status: 🟢 Phase 1 Complete. Ready to start Phase 2.
+## Current Status: 🟢 Skipping Phase 2. Starting Phase 3!
 
 ---
 

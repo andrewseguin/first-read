@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Star, Volume2, Mic, Play, Trash2, StopCircle } from "lucide-react"; // Import necessary icons
+import { Star, Volume2, Mic, Play, Trash2, StopCircle, Paintbrush } from "lucide-react"; // Import necessary icons
 import { Button } from "@/components/ui/button"; // Import Button component
 import { cn } from "@/lib/utils";
+import { TracingCanvas } from "./tracing-canvas";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Tooltip,
@@ -37,6 +38,7 @@ import { useAudio } from "@/components/AudioProvider";
 
 export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isTracingMode, setIsTracingMode] = useState(false);
   const audioData = useAudio();
   const audioContext = audioData?.audioContext;
   const buffers = audioData?.buffers;
@@ -44,6 +46,10 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
+
+  useEffect(() => {
+    setIsTracingMode(false);
+  }, [content.key]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const recordingValueRef = useRef<string | null>(null);
   const { isRecording, stream, startRecording, stopRecording } = useAudioRecorder();
@@ -333,6 +339,29 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
         borderLeft: "1px solid rgba(255,255,255,0.1)",
       }}
     >
+      {content.type === "letter" && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "absolute top-4 left-4 z-40 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300",
+              isTracingMode && "bg-white/20 text-white scale-110 shadow-lg"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsTracingMode(!isTracingMode);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            title={isTracingMode ? "Exit Tracing Mode" : "Trace Letters"}
+          >
+            <Paintbrush className="h-6 w-6" />
+          </Button>
+
+          {isTracingMode && <TracingCanvas contentKey={content.key} />}
+        </>
+      )}
+
       {content.type === "word" && content.isHardWord && (
         <TooltipProvider>
           <Tooltip>
@@ -387,10 +416,11 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
           <span
             className={cn(
               "font-headline font-normal leading-none flex items-baseline justify-center gap-0",
-              "select-none [text-shadow:3px_3px_6px_rgba(0,0,0,0.2)]",
+              "select-none [text-shadow:3px_3px_6px_rgba(0,0,0,0.2)] transition-opacity duration-300",
               letterCase === 'mixed' 
                 ? "text-8xl sm:text-[11rem] md:text-[14rem]" 
-                : "text-9xl sm:text-[14rem] md:text-[17.5rem]"
+                : "text-9xl sm:text-[14rem] md:text-[17.5rem]",
+              isTracingMode && "opacity-40"
             )}
             style={{
               color: content.textColor || 'white',
@@ -402,7 +432,10 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
           </span>
           );
         })()}
-        <div className="absolute bottom-4 left-4 flex items-center gap-1">
+        <div className={cn(
+          "absolute bottom-4 left-4 flex items-center gap-1 transition-opacity duration-300",
+          isTracingMode && "opacity-0 pointer-events-none"
+        )}>
           {enableRecordings && (localAudioUrl ? (
             <Button
               variant="ghost"
@@ -443,7 +476,8 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
             variant="ghost"
             className={cn(
               "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
-              isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white"
+              isPlaying ? "scale-110 opacity-100" : "text-white/70 hover:text-white",
+              isTracingMode && "opacity-0 pointer-events-none"
             )}
             onClick={(e) => speakLetter(e)}
             onPointerUp={(e) => e.stopPropagation()}
