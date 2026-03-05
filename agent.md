@@ -4,7 +4,7 @@ This document provides context for an AI assistant to help with the development 
 
 ## Project Overview
 
-First Read is a web application designed to help young children learn their letters and begin reading. The core feature is a large, interactive display of letters and words. Parents can customize the learning experience by selecting specific letters and game modes. The application is built with Next.js and utilizes Genkit for AI-powered features like an encouragement generator.
+First Read is a web application designed to help young children learn their letters and begin reading. The core feature is a large, interactive display of letters and words. Parents can customize the learning experience by selecting specific letters and game modes. The application is built with Next.js.
 
 The application has a playful and clean design, with a warm color palette and a focus on legibility and ease of use for young children.
 
@@ -12,7 +12,6 @@ The application has a playful and clean design, with a warm color palette and a 
 
 *   **Framework**: [Next.js](https://nextjs.org/) (v15.5.9) with Turbopack
 *   **Language**: [TypeScript](https://www.typescriptlang.org/)
-*   **AI**: [Genkit](https://firebase.google.com/docs/genkit)
 *   **UI Components**: [shadcn/ui](https://ui.shadcn.com/) built on top of [Radix UI](https://www.radix-ui.com/)
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 *   **State Management**: React Hooks and `use-local-storage` for persistence.
@@ -31,9 +30,6 @@ The application has a playful and clean design, with a warm color palette and a 
     *   `src/lib/`: Contains utility functions and data.
         *   `letters.ts`: Defines the letters, their colors, and levels.
         *   `words.ts`: Contains the lists of easy and hard words.
-    *   `src/ai/`: Contains the Genkit AI logic.
-        *   `genkit.ts`: The main Genkit configuration file.
-        *   `dev.ts`: The development server for Genkit.
     *   `public/`: Contains static assets like images and sounds.
     *   `docs/blueprint.md`: Contains the original design and style guidelines for the app.
 
@@ -54,17 +50,10 @@ npm run dev
 
 This will start the Next.js development server on port 9002.
 
-To run the Genkit AI development server, use:
-
-```bash
-npm run genkit:dev
-```
-
 ## Development Workflow
 
 1.  Pull the latest changes from the main branch.
 2.  Create a new branch for your feature or bug fix.
 3.  Make your changes in the codebase.
 4.  Run `npm run dev` to test your changes locally.
-5.  If you have made changes to the AI, run `npm run genkit:dev`.
-6.  Once you are happy with your changes, create a pull request.
+5.  Once you are happy with your changes, create a pull request.
