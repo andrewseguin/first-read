@@ -109,31 +109,6 @@ export default function Home() {
 
   useEffect(() => {
     setHydrated(true);
-
-    // Randomize initial content
-    if (gameMode === 'letters') {
-      const available = selectedLetters.length > 0 ? selectedLetters : DEFAULT_LETTERS;
-      const randomChar = available[Math.floor(Math.random() * available.length)];
-      const data = getLetterInfo(randomChar);
-      const newContent: DisplayContent = {
-        key: Date.now().toString(), // Ensure unique key
-        type: "letter",
-        value: randomChar,
-        color: data?.color,
-        textColor: data?.textColor,
-        verticalOffset: data?.verticalOffset,
-      };
-      setHistory([newContent]);
-      setHistoryIndex(0);
-      displayContentRef.current = newContent;
-    } else if (gameMode === 'words') {
-      // Logic for words randomization if needed, though words mode usually starts blank or valid
-      // For now, let's keep it simple and just do letters as that's the main mode
-      // But actually, let's trigger a next word if we are in words mode
-      // To keep it simple and safe, we'll just stick to the letter randomization for now as that's the default
-      // and what the user is seeing.
-    }
-
   }, []);
 
   useEffect(() => {
@@ -208,7 +183,7 @@ export default function Home() {
     setWordsInCycle([]);
   }, [availableLetters, wordDifficulty, setWordsInCycle]);
 
-  const showNextContent = useCallback((force = false, isInteraction = false) => {
+  const showNextContent = useCallback((force = false, isInteraction = false, resetHistory = false) => {
     if (isMenuOpenRef.current && !force) return;
 
     const now = Date.now();
@@ -242,9 +217,14 @@ export default function Home() {
           type: "message",
           value: "No words can be formed with these letters.",
         };
-        const newHistory = history.slice(0, historyIndex + 1);
-        setHistory([...newHistory, newContent]);
-        setHistoryIndex(newHistory.length);
+        if (resetHistory) {
+          setHistory([newContent]);
+          setHistoryIndex(0);
+        } else {
+          const newHistory = history.slice(0, historyIndex + 1);
+          setHistory([...newHistory, newContent]);
+          setHistoryIndex(newHistory.length);
+        }
         return;
       }
       if (isInteraction) {
@@ -287,9 +267,14 @@ export default function Home() {
         textColor: textColor,
         isHardWord: isHard,
       };
-      const newHistory = history.slice(0, historyIndex + 1);
-      setHistory([...newHistory, newContent]);
-      setHistoryIndex(newHistory.length);
+      if (resetHistory) {
+        setHistory([newContent]);
+        setHistoryIndex(0);
+      } else {
+        const newHistory = history.slice(0, historyIndex + 1);
+        setHistory([...newHistory, newContent]);
+        setHistoryIndex(newHistory.length);
+      }
       return;
     }
 
@@ -325,16 +310,21 @@ export default function Home() {
       textColor: letterData?.textColor,
       verticalOffset: letterData?.verticalOffset,
     };
-    const newHistory = history.slice(0, historyIndex + 1);
-    setHistory([...newHistory, newContent]);
-    setHistoryIndex(newHistory.length);
+    if (resetHistory) {
+      setHistory([newContent]);
+      setHistoryIndex(0);
+    } else {
+      const newHistory = history.slice(0, historyIndex + 1);
+      setHistory([...newHistory, newContent]);
+      setHistoryIndex(newHistory.length);
+    }
   }, [availableLetters, lettersInCycle, setLettersInCycle, gameMode, wordDifficulty, history, historyIndex, setHistory, setHistoryIndex, wordsInCycle, setWordsInCycle, selectedWordLengths]);
 
   const prevSelectedLettersRef = useRef<string[]>(selectedLetters);
 
   useEffect(() => {
-    if (gameMode === 'words') {
-      showNextContent(true, false); // `true` to force it even if menu is open
+    if (gameMode === 'words' && prevSelectedLettersRef.current.join() !== selectedLetters.join()) {
+      showNextContent(true, false, true); // `true` to force it even if menu is open, `true` to reset history
       prevSelectedLettersRef.current = selectedLetters;
     }
   }, [gameMode, selectedLetters, showNextContent]);
@@ -418,10 +408,11 @@ export default function Home() {
 
       // Only update history if the content actually changes
       const updatedContent = newContent(displayContent);
-      if (updatedContent !== displayContent) {
-        const newHistory = history.slice(0, historyIndex + 1);
-        setHistory([...newHistory, updatedContent]);
-        setHistoryIndex(newHistory.length);
+      const lettersChanged = prevSelectedLettersRef.current.length > 0 && prevSelectedLettersRef.current.join() !== selectedLetters.join();
+
+      if (updatedContent !== displayContent || lettersChanged) {
+        setHistory([updatedContent]);
+        setHistoryIndex(0);
       }
 
       prevSelectedLettersRef.current = selectedLetters;
@@ -431,23 +422,22 @@ export default function Home() {
   const prevGameModeRef = useRef(gameMode);
   useEffect(() => {
     if (prevGameModeRef.current !== gameMode) {
-      showNextContent(true, false);
+      showNextContent(true, false, true);
       prevGameModeRef.current = gameMode;
     }
   }, [gameMode, showNextContent]);
 
+  const prevWordSettingsRef = useRef({ length: selectedWordLengths.join(), diff: wordDifficulty });
   useEffect(() => {
-    const isLengthInvalid = !selectedWordLengths.includes(displayContentRef.current.value.length);
-    const isDifficultyInvalid = wordDifficulty === 'easy' && HARD_WORDS.includes(displayContentRef.current.value);
-
-    if (
-      gameMode === 'words' &&
-      displayContentRef.current.type === 'word' &&
-      (isLengthInvalid || isDifficultyInvalid)
-    ) {
-      showNextContent(true, false); // Show a new word from the new valid pool
+    const prev = prevWordSettingsRef.current;
+    const curr = { length: selectedWordLengths.join(), diff: wordDifficulty };
+    if (prev.length !== curr.length || prev.diff !== curr.diff) {
+      if (gameMode === 'words') {
+         showNextContent(true, false, true);
+      }
+      prevWordSettingsRef.current = curr;
     }
-  }, [selectedWordLengths, gameMode, showNextContent, wordDifficulty]);
+  }, [selectedWordLengths, wordDifficulty, gameMode, showNextContent]);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
