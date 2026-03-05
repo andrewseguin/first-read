@@ -31,12 +31,13 @@ type DisplayContent = {
 type LetterDisplayProps = {
   content: DisplayContent;
   enableRecordings: boolean;
+  enableTracing?: boolean;
   letterCase?: "lower" | "upper" | "mixed";
 };
 
 import { useAudio } from "@/components/AudioProvider";
 
-export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' }: LetterDisplayProps) {
+export function LetterDisplay({ content, enableRecordings, enableTracing = true, letterCase = 'lower' }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isTracingMode, setIsTracingMode] = useState(false);
   const audioData = useAudio();
@@ -49,7 +50,7 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
 
   useEffect(() => {
     setIsTracingMode(false);
-  }, [content.key]);
+  }, [content.key, enableTracing]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const recordingValueRef = useRef<string | null>(null);
   const { isRecording, stream, startRecording, stopRecording } = useAudioRecorder();
@@ -339,7 +340,7 @@ export function LetterDisplay({ content, enableRecordings, letterCase = 'lower' 
         borderLeft: "1px solid rgba(255,255,255,0.1)",
       }}
     >
-      {content.type === "letter" && (
+      {enableTracing && content.type === "letter" && (
         <>
           <Button
             variant="ghost"

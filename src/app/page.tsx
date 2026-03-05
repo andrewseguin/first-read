@@ -11,6 +11,10 @@ import { FullscreenToggle } from "@/components/fullscreen-toggle";
 import { AppSettings } from "@/components/app-settings";
 import { SessionStats } from "@/components/session-stats";
 import { RecordingsModal } from "@/components/recordings-modal";
+import { Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const shuffle = (array: string[]) => {
   let currentIndex = array.length,
@@ -56,6 +60,7 @@ type DisplayContent = {
 };
 
 export default function Home() {
+  const { toast } = useToast();
   const [hydrated, setHydrated] = useState(false);
   const [letterCase, setLetterCase] = useLocalStorage<"lower" | "upper" | "mixed">(
     "first-read-letter-case",
@@ -110,6 +115,10 @@ export default function Home() {
 
   const [cardCount, setCardCount] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [isLocked, setIsLocked] = useLocalStorage<boolean>("first-read-app-locked", false);
+  const [enableTracing, setEnableTracing] = useLocalStorage<boolean>("first-read-enable-tracing", true);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const unlockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setHydrated(true);
@@ -445,6 +454,31 @@ export default function Home() {
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
+  const startUnlock = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    setIsUnlocking(true);
+    unlockTimeoutRef.current = setTimeout(() => {
+      unlockTimeoutRef.current = null; // Explicitly clear before unlocking
+      setIsLocked(false);
+      setIsUnlocking(false);
+      toast({
+        description: "App Unlocked. Settings restored.",
+      });
+    }, 3000);
+  };
+
+  const cancelUnlock = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    if (unlockTimeoutRef.current) {
+      clearTimeout(unlockTimeoutRef.current);
+      unlockTimeoutRef.current = null;
+      setIsUnlocking(false);
+      toast({
+        description: "Hold down the lock button for 3 seconds to unlock.",
+      });
+    }
+  };
+
   const handlePointerDown = (e: React.PointerEvent) => {
     // If a menu was just closed, ignore this interaction
     if (Date.now() - lastMenuCloseTimeRef.current < 300) return;
@@ -554,8 +588,8 @@ export default function Home() {
       onPointerUp={handlePointerUp}
       tabIndex={-1}
     >
-      <LetterDisplay content={displayContent} enableRecordings={enableRecordings} letterCase={letterCase} />
-      {!isFullscreen && (
+      <LetterDisplay content={displayContent} enableRecordings={enableRecordings} enableTracing={enableTracing} letterCase={letterCase} />
+      {!isFullscreen && !isLocked && (
         <div className="absolute top-4 right-4 flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
           <LetterSelector
             open={isMenuOpen}
@@ -578,11 +612,34 @@ export default function Home() {
             onShowTimerChange={setShowTimer}
             enableRecordings={enableRecordings}
             onEnableRecordingsChange={setEnableRecordings}
+            enableTracing={enableTracing}
+            onEnableTracingChange={setEnableTracing}
             open={isSettingsOpen}
             onOpenChange={handleSettingsOpenChange}
             onOpenRecordings={() => setIsRecordingsModalOpen(true)}
+            onLockApp={() => setIsLocked(true)}
           />
           <FullscreenToggle isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
+        </div>
+      )}
+
+      {!isFullscreen && isLocked && (
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-50">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "text-white/30 hover:bg-transparent transition-all ease-linear relative",
+              isUnlocking ? "text-white scale-150 duration-[3000ms]" : "hover:text-white/50 duration-200"
+            )}
+            onPointerDown={startUnlock}
+            onPointerUp={cancelUnlock}
+            onPointerLeave={cancelUnlock}
+            onPointerCancel={cancelUnlock}
+            aria-label="Unlock app"
+          >
+            <Lock className="h-6 w-6" />
+          </Button>
         </div>
       )}
       {(showCardCount || showTimer) && (

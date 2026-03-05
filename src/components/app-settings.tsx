@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Mic } from "lucide-react";
+import { Settings, Mic, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,9 +18,12 @@ type AppSettingsProps = {
   onShowTimerChange: (show: boolean) => void;
   enableRecordings: boolean;
   onEnableRecordingsChange: (show: boolean) => void;
+  enableTracing: boolean;
+  onEnableTracingChange: (enable: boolean) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenRecordings: () => void;
+  onLockApp?: () => void;
 };
 
 export function AppSettings({
@@ -30,9 +33,12 @@ export function AppSettings({
   onShowTimerChange,
   enableRecordings,
   onEnableRecordingsChange,
+  enableTracing,
+  onEnableTracingChange,
   open,
   onOpenChange,
   onOpenRecordings,
+  onLockApp,
 }: AppSettingsProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -94,6 +100,16 @@ export function AppSettings({
                 onCheckedChange={onEnableRecordingsChange}
               />
             </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tracing-toggle" className="text-base">
+                Enable Tracing
+              </Label>
+              <Switch
+                id="tracing-toggle"
+                checked={enableTracing}
+                onCheckedChange={onEnableTracingChange}
+              />
+            </div>
             <div className="pt-2">
               <Button
                 variant="outline"
@@ -107,6 +123,22 @@ export function AppSettings({
                   <Mic className="h-4 w-4" />
                 </div>
                 Manage Recordings
+              </Button>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                variant="destructive"
+                className="w-full justify-start gap-2 h-12 rounded-xl"
+                onClick={() => {
+                  onOpenChange(false);
+                  onLockApp?.();
+                }}
+              >
+                <div className="p-1.5 rounded-md bg-white/10">
+                  <Lock className="h-4 w-4" />
+                </div>
+                Lock Settings
               </Button>
             </div>
           </div>
