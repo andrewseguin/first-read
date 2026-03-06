@@ -102,6 +102,32 @@ export function AppSettings({
 
           <div className="space-y-4">
             <h4 className="font-medium leading-none font-headline text-lg">
+              Modes
+            </h4>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="uppercase-toggle" className="text-base">
+                Allow Uppercase
+              </Label>
+              <Switch
+                id="uppercase-toggle"
+                checked={enableUppercase}
+                onCheckedChange={onEnableUppercaseChange}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="words-toggle" className="text-base">
+                Allow Words Mode
+              </Label>
+              <Switch
+                id="words-toggle"
+                checked={enableWords}
+                onCheckedChange={onEnableWordsChange}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium leading-none font-headline text-lg">
               Card
             </h4>
             <div className="flex items-center justify-between">
@@ -138,32 +164,6 @@ export function AppSettings({
                 </div>
                 Manage Recordings
               </Button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-medium leading-none font-headline text-lg">
-              Modes
-            </h4>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="uppercase-toggle" className="text-base">
-                Allow Uppercase
-              </Label>
-              <Switch
-                id="uppercase-toggle"
-                checked={enableUppercase}
-                onCheckedChange={onEnableUppercaseChange}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="words-toggle" className="text-base">
-                Allow Words Mode
-              </Label>
-              <Switch
-                id="words-toggle"
-                checked={enableWords}
-                onCheckedChange={onEnableWordsChange}
-              />
             </div>
           </div>
 
