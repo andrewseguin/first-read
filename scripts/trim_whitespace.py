@@ -12,10 +12,10 @@ def trim_whitespace(input_path, output_path, padding=8):
     # Convert to grayscale to easily find non-white pixels
     gray = img.convert("L")
     
-    # Create mask: white pixels (>= 250) become 0, others (the illustration) become 255.
-    # Using a higher threshold (250) here since the first pass was already done
-    # mostly successfully, we just need to tighten up any remaining light-gray artifacts.
-    mask = gray.point(lambda p: 255 if p < 250 else 0)
+    # Create mask: white pixels (>= 235) become 0, others (the illustration) become 255.
+    # Using a slightly aggressive threshold (235) here to tighten up any remaining light-gray artifacts
+    # without cutting into the actual drawing.
+    mask = gray.point(lambda p: 255 if p < 235 else 0)
     
     # getbbox returns (left, upper, right, lower)
     bbox = mask.getbbox()
