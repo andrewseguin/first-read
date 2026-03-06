@@ -484,7 +484,7 @@ export default function Home() {
       toast({
         description: "App Unlocked. Settings restored.",
       });
-    }, 3000);
+    }, 2000);
   };
 
   const cancelUnlock = (e: React.PointerEvent) => {
@@ -494,7 +494,7 @@ export default function Home() {
       unlockTimeoutRef.current = null;
       setIsUnlocking(false);
       toast({
-        description: "Hold down the lock button for 3 seconds to unlock.",
+        description: "Hold down the lock button for 2 seconds to unlock.",
       });
     }
   };
@@ -656,7 +656,7 @@ export default function Home() {
             size="icon"
             className={cn(
               "text-destructive/50 hover:bg-transparent transition-all ease-linear relative",
-              isUnlocking ? "text-destructive scale-150 duration-[3000ms]" : "hover:text-destructive duration-200"
+              isUnlocking ? "text-destructive scale-150 duration-[2000ms]" : "hover:text-destructive duration-200"
             )}
             onPointerDown={startUnlock}
             onPointerUp={cancelUnlock}
