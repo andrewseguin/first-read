@@ -55,12 +55,12 @@ def process_poster(image_path, output_dir):
         letter = chr(ord('a') + i)
         
         # Use asymmetric insets: 
-        # - Small top inset (2%) to preserve tall hats ('motion-a')
-        # - Large right (6%) and bottom (5%) insets to avoid stray yellow grid pixels ('motion-l')
+        # - Small top inset (3%) to preserve tall hats ('motion-a') but clear top borders
+        # - Large right (7%) and bottom (5%) insets to avoid stray yellow grid pixels ('motion-x', 'motion-l')
         # - Moderate left inset (4%) to avoid the left grid line
         inset_left = int(cell_w * 0.04)
-        inset_right = int(cell_w * 0.06)
-        inset_top = int(cell_h * 0.02)
+        inset_right = int(cell_w * 0.07)
+        inset_top = int(cell_h * 0.03)
         inset_bottom = int(cell_h * 0.05)
         
         x1 = int(margin_x + c * cell_w) + inset_left

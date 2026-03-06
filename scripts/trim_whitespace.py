@@ -12,24 +12,29 @@ def trim_whitespace(input_path, output_path, padding=8):
     # Convert to grayscale to easily find non-white pixels
     gray = img.convert("L")
     
-    # Create mask: white pixels (>= 235) become 0, others (the illustration) become 255.
-    # Using a slightly aggressive threshold (235) here to tighten up any remaining light-gray artifacts
-    # without cutting into the actual drawing.
-    mask = gray.point(lambda p: 255 if p < 235 else 0)
+    # Create mask: white pixels (>= 210) become 0, others (the illustration) become 255.
+    # Using a very aggressive threshold (210) here to tighten up any remaining light-gray artifacts
+    # without cutting into the actual drawing. This fixes wide whitespace on 'motion-x' which had rgb(217).
+    mask = gray.point(lambda p: 255 if p < 210 else 0)
     
     # getbbox returns (left, upper, right, lower)
     bbox = mask.getbbox()
     
     if bbox:
-        # Add the desired padding
-        l = max(0, bbox[0] - padding)
-        u = max(0, bbox[1] - padding)
-        r = min(img.width, bbox[2] + padding)
-        b = min(img.height, bbox[3] + padding)
+        # Extract just the non-white illustration
+        illustration = img.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
         
-        # Crop the original image
-        cropped = img.crop((l, u, r, b))
-        cropped.save(output_path)
+        # Calculate new dimensions adding the exact padding to all sides
+        new_w = illustration.width + (padding * 2)
+        new_h = illustration.height + (padding * 2)
+        
+        # Create a completely new pure white canvas
+        new_img = Image.new("RGB", (new_w, new_h), "white")
+        
+        # Paste the perfectly cropped illustration into the center
+        new_img.paste(illustration, (padding, padding))
+            
+        new_img.save(output_path)
         return True
     else:
         print(f"Warning: {input_path} crop failed (completely white?)")
