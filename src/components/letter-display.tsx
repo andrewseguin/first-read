@@ -440,7 +440,9 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           {enableRecordings && (localAudioUrl ? (
             <Button
               variant="ghost"
-              className="h-12 w-12 p-0 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300"
+              className={cn(
+                "h-12 w-12 p-0 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300"
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteRecording();
@@ -454,10 +456,10 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
             <Button
               variant="ghost"
               className={cn(
-                "h-12 w-12 p-0 transition-all duration-300 rounded-full",
+                "h-12 w-12 p-0 transition-all duration-300 rounded-full hover:text-white hover:bg-white/10",
                 isRecording
                   ? "bg-red-600 text-white scale-110 animate-pulse hover:bg-red-700 shadow-lg"
-                  : "text-white/50 hover:text-white hover:bg-white/10"
+                  : "text-white/50"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -476,8 +478,8 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           <Button
             variant="ghost"
             className={cn(
-              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
-              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70 hover:text-white",
+              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10 hover:text-white",
+              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70",
               isTracingMode && "opacity-0 pointer-events-none"
             )}
             onClick={(e) => speakLetter(e)}
@@ -496,8 +498,8 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           <Button
             variant="ghost"
             className={cn(
-              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
-              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70 hover:text-white"
+              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10 hover:text-white",
+              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70"
             )}
             onClick={(e) => speakWord(e)}
             onPointerUp={(e) => e.stopPropagation()}
