@@ -446,7 +446,7 @@ export default function Home() {
     const curr = { length: selectedWordLengths.join(), diff: wordDifficulty };
     if (prev.length !== curr.length || prev.diff !== curr.diff) {
       if (gameMode === 'words') {
-         showNextContent(true, false, true);
+        showNextContent(true, false, true);
       }
       prevWordSettingsRef.current = curr;
     }
@@ -629,8 +629,8 @@ export default function Home() {
             variant="ghost"
             size="icon"
             className={cn(
-              "text-white/30 hover:bg-transparent transition-all ease-linear relative",
-              isUnlocking ? "text-white scale-150 duration-[3000ms]" : "hover:text-white/50 duration-200"
+              "text-destructive/50 hover:bg-transparent transition-all ease-linear relative",
+              isUnlocking ? "text-destructive scale-150 duration-[3000ms]" : "hover:text-destructive duration-200"
             )}
             onPointerDown={startUnlock}
             onPointerUp={cancelUnlock}

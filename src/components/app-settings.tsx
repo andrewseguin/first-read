@@ -113,14 +113,14 @@ export function AppSettings({
             <div className="pt-2">
               <Button
                 variant="outline"
-                className="w-full justify-start gap-2 h-12 rounded-xl border-white/10 hover:bg-white/5"
+                className="w-full justify-start gap-2 h-12 rounded-xl border-border hover:bg-muted/50"
                 onClick={() => {
                   onOpenChange(false);
                   onOpenRecordings();
                 }}
               >
-                <div className="p-1.5 rounded-md bg-white/5">
-                  <Mic className="h-4 w-4" />
+                <div className="p-1.5 rounded-md bg-foreground/5">
+                  <Mic className="h-4 w-4 text-foreground" />
                 </div>
                 Manage Recordings
               </Button>
@@ -135,8 +135,8 @@ export function AppSettings({
                   onLockApp?.();
                 }}
               >
-                <div className="p-1.5 rounded-md bg-white/10">
-                  <Lock className="h-4 w-4" />
+                <div className="p-1.5 rounded-md bg-white/20">
+                  <Lock className="h-4 w-4 text-white" />
                 </div>
                 Lock Settings
               </Button>

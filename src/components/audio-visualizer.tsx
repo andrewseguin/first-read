@@ -73,7 +73,7 @@ export function AudioVisualizer({ stream }: AudioVisualizerProps) {
     if (!stream) return null;
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 h-2 overflow-hidden rounded-b-xl bg-white/5 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 h-2 overflow-hidden rounded-b-xl bg-muted/50 pointer-events-none">
             <div
                 ref={barRef}
                 className="h-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)]"
