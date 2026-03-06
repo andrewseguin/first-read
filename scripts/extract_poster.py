@@ -54,8 +54,8 @@ def process_poster(image_path, output_dir):
         c = i % cols
         letter = chr(ord('a') + i)
         
-        inset_x = int(cell_w * 0.04)
-        inset_y = int(cell_h * 0.02)
+        inset_x = int(cell_w * 0.06)
+        inset_y = int(cell_h * 0.05)
         x1 = int(margin_x + c * cell_w) + inset_x
         y1 = int(margin_y + r * cell_h) + inset_y
         x2 = int(margin_x + (c + 1) * cell_w) - inset_x
