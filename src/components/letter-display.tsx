@@ -346,8 +346,8 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
             variant="ghost"
             size="icon"
             className={cn(
-              "absolute top-4 left-4 z-40 text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-all duration-300",
-              isTracingMode && "bg-foreground/20 text-foreground scale-110 shadow-lg"
+              "absolute top-4 left-4 z-40 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300",
+              isTracingMode && "bg-white/20 text-white scale-110 shadow-lg"
             )}
             onClick={(e) => {
               e.stopPropagation();
@@ -367,7 +367,7 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="absolute top-4 right-4 text-foreground/50">
+              <div className="absolute top-4 right-4 text-white/50">
                 <Star className="h-6 w-6" />
               </div>
             </TooltipTrigger>
@@ -440,7 +440,7 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           {enableRecordings && (localAudioUrl ? (
             <Button
               variant="ghost"
-              className="h-12 w-12 p-0 text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-all duration-30"
+              className="h-12 w-12 p-0 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteRecording();
@@ -457,7 +457,7 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
                 "h-12 w-12 p-0 transition-all duration-300 rounded-full",
                 isRecording
                   ? "bg-red-600 text-white scale-110 animate-pulse hover:bg-red-700 shadow-lg"
-                  : "text-foreground/50 hover:text-foreground hover:bg-foreground/10"
+                  : "text-white/50 hover:text-white hover:bg-white/10"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -476,14 +476,13 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           <Button
             variant="ghost"
             className={cn(
-              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-foreground/10",
-              isPlaying ? "scale-110 opacity-100" : "text-foreground/70 hover:text-foreground",
+              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
+              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70 hover:text-white",
               isTracingMode && "opacity-0 pointer-events-none"
             )}
             onClick={(e) => speakLetter(e)}
             onPointerUp={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            style={{ color: 'white' }}
           >
             <Volume2
               className="h-12 w-12"
@@ -497,13 +496,12 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
           <Button
             variant="ghost"
             className={cn(
-              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-foreground/10",
-              isPlaying ? "scale-110 opacity-100" : "text-foreground/70 hover:text-foreground"
+              "absolute bottom-4 right-4 h-12 w-12 p-0 transition-all duration-300 hover:bg-white/10",
+              isPlaying ? "scale-110 opacity-100 text-white" : "text-white/70 hover:text-white"
             )}
             onClick={(e) => speakWord(e)}
             onPointerUp={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            style={{ color: 'white' }}
           >
             <Volume2
               className="h-12 w-12"
