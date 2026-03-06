@@ -4,6 +4,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Star, Volume2, Mic, Play, Trash2, StopCircle, Paintbrush } from "lucide-react"; // Import necessary icons
 import { Button } from "@/components/ui/button"; // Import Button component
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { TracingCanvas } from "./tracing-canvas";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +50,7 @@ import { useAudio } from "@/components/AudioProvider";
 export function LetterDisplay({ content, enableRecordings, enableTracing = true, letterCase = 'lower' }: LetterDisplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isTracingMode, setIsTracingMode] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const audioData = useAudio();
   const audioContext = audioData?.audioContext;
   const buffers = audioData?.buffers;
@@ -445,7 +456,7 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                handleDeleteRecording();
+                setShowDeleteConfirm(true);
               }}
               onPointerDown={(e) => e.stopPropagation()}
               title="Delete recording"
@@ -515,6 +526,26 @@ export function LetterDisplay({ content, enableRecordings, enableTracing = true,
         )}
         {isRecording && <AudioVisualizer stream={stream} />}
       </CardContent>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="rounded-2xl border-none bg-background/95 backdrop-blur-md shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-headline">Delete Recording?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-muted-foreground">
+              Are you sure you want to delete the custom recording for "<span className="font-semibold text-foreground">{content.value}</span>"? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl border-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteRecording}
+              className="rounded-xl bg-red-600 hover:bg-red-700 text-white border-none"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
