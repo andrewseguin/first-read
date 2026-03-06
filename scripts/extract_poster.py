@@ -20,15 +20,34 @@ def process_poster(image_path, output_dir):
     cell_w = grid_w / cols
     cell_h = grid_h / rows
     
-    splits = {
-        'm': 0.58,
-        'w': 0.58,
-        'q': 0.55,
-        'i': 0.45,
-        'n': 0.55,
-        'r': 0.55,
-        't': 0.45,
-    }
+    def find_split(cell_img):
+        # Calculate vertical projection to find the best split point
+        gray = cell_img.convert("L")
+        w, h = gray.size
+        
+        col_sums = []
+        for x in range(w):
+            col_sum = 0
+            for y in range(h):
+                # Only count dark pixels as part of the illustration
+                if gray.getpixel((x, y)) < 240:
+                    col_sum += 1
+            col_sums.append(col_sum)
+            
+        start_x = int(w * 0.35)
+        end_x = int(w * 0.65)
+        
+        min_sum = float('inf')
+        best_x = int(w * 0.5)
+        
+        for x in range(start_x, end_x):
+            # Apply a small moving average to smooth it out (width 5)
+            window_sum = sum(col_sums[max(start_x, x-2):min(end_x, x+3)])
+            if window_sum < min_sum:
+                min_sum = window_sum
+                best_x = x
+                
+        return best_x
     
     for i in range(26):
         r = i // cols
@@ -43,8 +62,7 @@ def process_poster(image_path, output_dir):
         y2 = int(margin_y + (r + 1) * cell_h) - inset_y
         
         cell = img.crop((x1, y1, x2, y2))
-        split_ratio = splits.get(letter, 0.50)
-        split_x = int(cell.width * split_ratio)
+        split_x = find_split(cell)
         
         letter_part = cell.crop((0, 0, split_x, cell.height))
         motion_part = cell.crop((split_x, 0, cell.width, cell.height))
