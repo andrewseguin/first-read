@@ -67,7 +67,7 @@ export function AppSettings({
         collisionPadding={16}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <div className="grid gap-8">
+        <div className="grid gap-6">
           <div className="space-y-4">
             <h4 className="font-medium leading-none font-headline text-lg">
               Theme
@@ -150,7 +150,7 @@ export function AppSettings({
                 onCheckedChange={onEnableTracingChange}
               />
             </div>
-            <div className="pt-2">
+            <div>
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2 h-12 rounded-xl border-border hover:bg-muted/50"
@@ -167,7 +167,7 @@ export function AppSettings({
             </div>
           </div>
 
-          <div className="pt-2">
+          <div>
             <Button
               variant="destructive"
               className="w-full justify-start gap-2 h-12 rounded-xl"
