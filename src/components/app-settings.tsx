@@ -76,7 +76,7 @@ export function AppSettings({
           </div>
           <div className="space-y-4">
             <h4 className="font-medium leading-none font-headline text-lg">
-              Display
+              Counters
             </h4>
             <div className="flex items-center justify-between">
               <Label htmlFor="card-count-toggle" className="text-base">
@@ -98,6 +98,12 @@ export function AppSettings({
                 onCheckedChange={onShowTimerChange}
               />
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium leading-none font-headline text-lg">
+              Card
+            </h4>
             <div className="flex items-center justify-between">
               <Label htmlFor="recordings-toggle" className="text-base">
                 Enable Recordings
@@ -118,6 +124,27 @@ export function AppSettings({
                 onCheckedChange={onEnableTracingChange}
               />
             </div>
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 h-12 rounded-xl border-border hover:bg-muted/50"
+                onClick={() => {
+                  onOpenChange(false);
+                  onOpenRecordings();
+                }}
+              >
+                <div className="p-1.5 rounded-md bg-foreground/5">
+                  <Mic className="h-4 w-4 text-foreground" />
+                </div>
+                Manage Recordings
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium leading-none font-headline text-lg">
+              Modes
+            </h4>
             <div className="flex items-center justify-between">
               <Label htmlFor="uppercase-toggle" className="text-base">
                 Allow Uppercase
@@ -138,37 +165,22 @@ export function AppSettings({
                 onCheckedChange={onEnableWordsChange}
               />
             </div>
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-2 h-12 rounded-xl border-border hover:bg-muted/50"
-                onClick={() => {
-                  onOpenChange(false);
-                  onOpenRecordings();
-                }}
-              >
-                <div className="p-1.5 rounded-md bg-foreground/5">
-                  <Mic className="h-4 w-4 text-foreground" />
-                </div>
-                Manage Recordings
-              </Button>
-            </div>
+          </div>
 
-            <div className="pt-2">
-              <Button
-                variant="destructive"
-                className="w-full justify-start gap-2 h-12 rounded-xl"
-                onClick={() => {
-                  onOpenChange(false);
-                  onLockApp?.();
-                }}
-              >
-                <div className="p-1.5 rounded-md bg-white/20">
-                  <Lock className="h-4 w-4 text-white" />
-                </div>
-                Lock Settings
-              </Button>
-            </div>
+          <div className="pt-2">
+            <Button
+              variant="destructive"
+              className="w-full justify-start gap-2 h-12 rounded-xl"
+              onClick={() => {
+                onOpenChange(false);
+                onLockApp?.();
+              }}
+            >
+              <div className="p-1.5 rounded-md bg-white/20">
+                <Lock className="h-4 w-4 text-white" />
+              </div>
+              Lock Settings
+            </Button>
           </div>
         </div>
       </PopoverContent>
