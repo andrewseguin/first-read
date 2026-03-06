@@ -9,12 +9,14 @@ type GameModeToggleProps = {
   value: string;
   onValueChange: (value: string) => void;
   className?: string;
+  enableWords: boolean;
 };
 
 export function GameModeToggle({
   value,
   onValueChange,
   className,
+  enableWords,
 }: GameModeToggleProps) {
   return (
     <div
@@ -30,13 +32,15 @@ export function GameModeToggle({
       >
         Letters
       </Button>
-      <Button
-        variant={value === "words" ? "default" : "ghost"}
-        className="rounded-full w-full"
-        onClick={() => onValueChange("words")}
-      >
-        Words
-      </Button>
+      {enableWords && (
+        <Button
+          variant={value === "words" ? "default" : "ghost"}
+          className="rounded-full w-full"
+          onClick={() => onValueChange("words")}
+        >
+          Words
+        </Button>
+      )}
     </div>
   );
 }

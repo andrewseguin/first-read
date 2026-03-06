@@ -24,6 +24,8 @@ type LetterSelectorProps = {
   onSelectedWordLengthsChange: (lengths: number[]) => void;
   letterCase: "lower" | "upper" | "mixed";
   onLetterCaseChange: (casing: "lower" | "upper" | "mixed") => void;
+  enableUppercase: boolean;
+  enableWords: boolean;
 };
 
 import { WordDifficultyToggle } from "./word-difficulty-toggle";
@@ -42,6 +44,8 @@ export function LetterSelector({
   onSelectedWordLengthsChange,
   letterCase,
   onLetterCaseChange,
+  enableUppercase,
+  enableWords,
 }: LetterSelectorProps) {
   const handleLetterChange = (letter: string, checked: boolean) => {
     setSelectedLetters((prev) => {
@@ -117,8 +121,9 @@ export function LetterSelector({
                 value={gameMode}
                 onValueChange={onGameModeChange}
                 className="w-full mb-8"
+                enableWords={enableWords}
               />
-              {gameMode === 'letters' && (
+              {enableUppercase && gameMode === 'letters' && (
                 <div className="mb-8">
                   <h4 className="font-medium leading-none font-headline text-lg mb-4">
                     Letter Casing

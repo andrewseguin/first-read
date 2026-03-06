@@ -23,6 +23,10 @@ type AppSettingsProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenRecordings: () => void;
+  enableUppercase: boolean;
+  onEnableUppercaseChange: (enable: boolean) => void;
+  enableWords: boolean;
+  onEnableWordsChange: (enable: boolean) => void;
   onLockApp?: () => void;
 };
 
@@ -38,6 +42,10 @@ export function AppSettings({
   open,
   onOpenChange,
   onOpenRecordings,
+  enableUppercase,
+  onEnableUppercaseChange,
+  enableWords,
+  onEnableWordsChange,
   onLockApp,
 }: AppSettingsProps) {
   return (
@@ -108,6 +116,26 @@ export function AppSettings({
                 id="tracing-toggle"
                 checked={enableTracing}
                 onCheckedChange={onEnableTracingChange}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="uppercase-toggle" className="text-base font-medium text-primary">
+                Allow Uppercase
+              </Label>
+              <Switch
+                id="uppercase-toggle"
+                checked={enableUppercase}
+                onCheckedChange={onEnableUppercaseChange}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="words-toggle" className="text-base font-medium text-primary">
+                Allow Words Mode
+              </Label>
+              <Switch
+                id="words-toggle"
+                checked={enableWords}
+                onCheckedChange={onEnableWordsChange}
               />
             </div>
             <div className="pt-2">

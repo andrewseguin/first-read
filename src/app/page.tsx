@@ -97,6 +97,14 @@ export default function Home() {
     "first-read-enable-recordings",
     true
   );
+  const [enableUppercase, setEnableUppercase] = useLocalStorage<boolean>(
+    "first-read-enable-uppercase",
+    true
+  );
+  const [enableWords, setEnableWords] = useLocalStorage<boolean>(
+    "first-read-enable-words",
+    true
+  );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -135,6 +143,18 @@ export default function Home() {
   useEffect(() => {
     isMenuOpenRef.current = isMenuOpen || isSettingsOpen || isRecordingsModalOpen;
   }, [isMenuOpen, isSettingsOpen, isRecordingsModalOpen]);
+
+  useEffect(() => {
+    if (!enableUppercase && (letterCase === 'upper' || letterCase === 'mixed')) {
+      setLetterCase('lower');
+    }
+  }, [enableUppercase, letterCase, setLetterCase]);
+
+  useEffect(() => {
+    if (!enableWords && gameMode === 'words') {
+      setGameMode('letters');
+    }
+  }, [enableWords, gameMode, setGameMode]);
 
   const availableLetters = useMemo(() => {
     return selectedLetters.length > 0 ? selectedLetters : [];
@@ -604,6 +624,8 @@ export default function Home() {
             onSelectedWordLengthsChange={setSelectedWordLengths}
             letterCase={letterCase}
             onLetterCaseChange={setLetterCase}
+            enableUppercase={enableUppercase}
+            enableWords={enableWords}
           />
           <AppSettings
             showCardCount={showCardCount}
@@ -614,6 +636,10 @@ export default function Home() {
             onEnableRecordingsChange={setEnableRecordings}
             enableTracing={enableTracing}
             onEnableTracingChange={setEnableTracing}
+            enableUppercase={enableUppercase}
+            onEnableUppercaseChange={setEnableUppercase}
+            enableWords={enableWords}
+            onEnableWordsChange={setEnableWords}
             open={isSettingsOpen}
             onOpenChange={handleSettingsOpenChange}
             onOpenRecordings={() => setIsRecordingsModalOpen(true)}
