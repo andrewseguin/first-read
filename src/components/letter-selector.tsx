@@ -111,18 +111,19 @@ export function LetterSelector({
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid gap-4 sm:mt-0">
             <div>
-              <h4 className="font-medium leading-none font-headline text-lg mb-4 hidden sm:block">
-                Game Mode
-              </h4>
-              <h4 className="font-medium leading-none font-headline text-lg mb-4 sm:hidden">
-                Game Mode
-              </h4>
-              <GameModeToggle
-                value={gameMode}
-                onValueChange={onGameModeChange}
-                className="w-full mb-8"
-                enableWords={enableWords}
-              />
+              {enableWords && (
+                <>
+                  <h4 className="font-medium leading-none font-headline text-lg mb-4">
+                    Game Mode
+                  </h4>
+                  <GameModeToggle
+                    value={gameMode}
+                    onValueChange={onGameModeChange}
+                    className="w-full mb-8"
+                    enableWords={enableWords}
+                  />
+                </>
+              )}
               {enableUppercase && gameMode === 'letters' && (
                 <div className="mb-8">
                   <h4 className="font-medium leading-none font-headline text-lg mb-4">
