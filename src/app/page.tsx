@@ -655,8 +655,8 @@ export default function Home() {
             variant="ghost"
             size="icon"
             className={cn(
-              "text-destructive/50 hover:bg-transparent transition-all ease-linear relative",
-              isUnlocking ? "text-destructive scale-150 duration-[2000ms]" : "hover:text-destructive duration-200"
+              "text-foreground/50 hover:bg-transparent transition-all ease-linear relative",
+              isUnlocking ? "text-destructive scale-150 duration-[2000ms]" : "hover:text-foreground duration-200"
             )}
             onPointerDown={startUnlock}
             onPointerUp={cancelUnlock}
