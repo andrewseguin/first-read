@@ -119,7 +119,7 @@ export function AppSettings({
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="uppercase-toggle" className="text-base font-medium text-primary">
+              <Label htmlFor="uppercase-toggle" className="text-base">
                 Allow Uppercase
               </Label>
               <Switch
@@ -129,7 +129,7 @@ export function AppSettings({
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="words-toggle" className="text-base font-medium text-primary">
+              <Label htmlFor="words-toggle" className="text-base">
                 Allow Words Mode
               </Label>
               <Switch
