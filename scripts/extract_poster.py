@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw
 def process_poster(image_path, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     try:
-        img = Image.open(image_path).convert("RGBA")
+        img = Image.open(image_path).convert("RGB")
     except Exception as e:
         print(f"Error reading image: {e}")
         sys.exit(1)
@@ -68,49 +68,26 @@ def process_poster(image_path, output_dir):
         motion_part = cell.crop((split_x, 0, cell.width, cell.height))
         
         def process_part(part, name):
-            # Floodfill from edges replacing white with transparent
-            # Need to use ImageDraw.floodfill
+            # Convert to grayscale to easily find non-white pixels
+            gray = part.convert("L")
+            # Anything that's bright white (e.g., > 240) becomes 0, else 255.
+            # This creates a mask of the illustration.
+            mask = gray.point(lambda p: 255 if p < 240 else 0)
             
-            # Create a copy to work on
-            filled = part.copy()
-            w, h = filled.size
+            # getbbox() works nicely now, giving us the bounds of the non-zero (non-white original) pixels
+            bbox = mask.getbbox()
             
-            # Points to seed the floodfill
-            pts = []
-            for px in range(0, w, max(1, w//4)):
-                pts.extend([(px, 0), (px, h-1)])
-            for py in range(0, h, max(1, h//4)):
-                pts.extend([(0, py), (w-1, py)])
-                
-            for pt in pts:
-                if pt[0] < w and pt[1] < h:
-                    # Only fill if pixel is "white-ish"
-                    r_p, g_p, b_p, a_p = filled.getpixel(pt)
-                    if r_p > 220 and g_p > 220 and b_p > 220:
-                        try:
-                            ImageDraw.floodfill(filled, pt, (255, 255, 255, 0), thresh=40)
-                        except Exception as e:
-                            # If floodfill fails, just skip this point
-                            pass
-
-            # Now, find bounding box of non-transparent areas.
-            # To use getbbox(), we need the transparent areas to have alph=0
-            # getbbox() checks for non-zero pixels. It works on the whole image.
-            # If we extract just the alpha channel, getbbox() will give the bounds of non-zero alpha
-            alpha = filled.split()[3]
-            bbox = alpha.getbbox()
-            
+            w, h = part.size
             if bbox:
-                # bbox is (left, upper, right, lower)
-                # Expand by 2px safely
+                # Add a safe 2px padding
                 l = max(0, bbox[0] - 2)
                 u = max(0, bbox[1] - 2)
                 r_c = min(w, bbox[2] + 2)
                 b_c = min(h, bbox[3] + 2)
-                cropped = filled.crop((l, u, r_c, b_c))
+                cropped = part.crop((l, u, r_c, b_c))
             else:
-                cropped = filled
-                print(f"Warning: {name} crop failed (completely transparent?)")
+                cropped = part
+                print(f"Warning: {name} crop failed (completely white?)")
                 
             path = os.path.join(output_dir, f"{name}.png")
             cropped.save(path)
@@ -119,7 +96,7 @@ def process_poster(image_path, output_dir):
         process_part(motion_part, f"motion-{letter}")
         print(f"Processed: {letter}")
 
-    print("Extraction complete! 52 high-quality transparent images saved.")
+    print("Extraction complete! 52 high-quality images saved.")
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
